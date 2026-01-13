@@ -11,6 +11,18 @@ export default {
   theme: {
     extend: {
       colors: {
+        ppurple: "#5D6DFF",
+        pblue: "#4E8FF5",
+        plightblue: "#69D1F4",
+        pskyblue: "#D0E6FE",
+        pdarkblue: "#17203D",
+        pblack: "#141517",
+        pdarklav: "#B1B0CF",
+        plightpurple: "#BCB6FE",
+        pgray: "#888D91",
+        pred: "#C33C54",
+        pyellow: "#F4E04D",
+        pgreen: "#157A6E",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
