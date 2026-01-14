@@ -31,7 +31,7 @@ export default function Home() {
 
         <div className="flex w-full flex-col gap-4 max-w-sm">
           <Link
-            href="/explorar"
+            href="/"
             className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-pblue bg-transparent px-6 py-3 text-base font-semibold text-pblue shadow-[0_10px_30px_rgba(47,113,240,0.28)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(47,113,240,0.32)]"
           >
             Continua como invitado
@@ -41,7 +41,7 @@ export default function Home() {
           </Link>
 
           <Link
-            href="/explorar"
+            href="/auth/sign-up"
             className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-white bg-transparent px-6 py-3 text-base font-semibold text-white shadow-[0_10px_30px_rgba(47,113,240,0.28)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(47,113,240,0.32)]"
           >
             Regístrate
