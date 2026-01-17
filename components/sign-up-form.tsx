@@ -30,6 +30,7 @@ export function SignUpForm({
   const [age, setAge] = useState("");
   const [opinion, setOpinion] = useState("");
   const [state, setState] = useState("");
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = createClient();
@@ -62,7 +63,7 @@ export function SignUpForm({
         },
       });
       if (error) throw error;
-      router.push("/auth/sign-up-success");
+      router.push("/protected");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
