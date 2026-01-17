@@ -74,13 +74,13 @@ export function SignUpForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="min-h-screen">
         <CardHeader className="text-center items-center">
-          <Image src="/portal-icon.svg" alt="portal icon" width={60} height={60}  />
+          <Image src="/portal-icon.svg" alt="portal icon" width={60} height={60} />
           <CardTitle className="text-2xl">Crea Una Cuenta</CardTitle>
           <CardDescription>Porfavor ingresa tus datos</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignUp}>
-            <div className="flex flex-col gap-6">
+          <form onSubmit={handleSignUp} className="flex flex-col items-center">
+            <div className="flex flex-col gap-6 w-full max-w-md">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -90,6 +90,7 @@ export function SignUpForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="w-full"
                 />
               </div>
               <div className="grid gap-2">
@@ -102,6 +103,7 @@ export function SignUpForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="w-full"
                 />
               </div>
               {/* <div className="grid gap-2">
@@ -124,7 +126,7 @@ export function SignUpForm({
                   required
                   value={state}
                   onChange={(e) => setState(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring  disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                  className="flex h-10 w-full max-w-md rounded-md border border-input bg-white px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
                 >
                   <option value="">Selecciona un departamento</option>
                   <option value="Amazonas">Amazonas</option>
@@ -163,6 +165,7 @@ export function SignUpForm({
                   type="number"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
+                  className="w-full"
                 />
               </div>
 
@@ -173,10 +176,15 @@ export function SignUpForm({
                   type="text"
                   value={opinion}
                   onChange={(e) => setOpinion(e.target.value)}
+                  className="w-full"
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full max-w-md"
+                disabled={isLoading}
+              >
                 {isLoading ? "Creando una cuenta..." : "Crear cuenta"}
               </Button>
             </div>
