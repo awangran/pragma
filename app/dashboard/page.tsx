@@ -1,23 +1,11 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Suspense } from "react";
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import CandidateCard from "../../components/candidate-card";
 import {candidates} from "../../data/candidates";
 import type { Candidate } from "../../types/candidates";
-
-// User authentication check
-async function UserAuthCheck() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.getClaims();
-
-  if (error || !data?.claims) {
-    redirect("/auth/login");
-  }
-
-  return null;
-}
+import Footer from "@/components/footer";
 
 // Placeholder data for news
 const news = [
@@ -76,21 +64,23 @@ const elections = [
   },
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  const user = (data && (data as any).user) ? (data as any).user : null;
+  const avatarUrl = user?.user_metadata?.avatar_url ?? null;
+
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
-      <Navbar />
-      <Suspense>
-        <UserAuthCheck />
-      </Suspense>
+      <Navbar user={user ? { avatarUrl } : undefined} />
       <main className="px-12 py-4">
         {/* Noticias */}
-        <h2 className="text-2xl font-bold mb-4">Noticias</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-pblack">Noticias</h2>
         <div className="flex flex-col md:flex-row gap-6 w-full">
           {/* Main news */}
           <Link
             href={news[0].href}
-            className="w-full md:flex-1 rounded-xl bg-gradient-to-br from-blue-200 to-blue-400 p-8 min-h-[260px] flex flex-col justify-end shadow-md transition hover:scale-[1.01]"
+            className="w-full md:flex-1 rounded-md bg-gradient-to-br from-blue-200 to-blue-400 p-8 min-h-[260px] flex flex-col justify-end shadow-md transition hover:scale-[1.01]"
             style={{ minWidth: 0 }}
           >
             <div className="text-white text-2xl font-semibold mb-2">
@@ -104,7 +94,7 @@ export default function DashboardPage() {
               <Link
                 key={item.id}
                 href={item.href}
-                className="w-full rounded-xl bg-gradient-to-br from-blue-200 to-blue-400 p-4 min-h-[70px] flex flex-col justify-between shadow-md transition hover:scale-[1.01]"
+                className="w-full rounded-md bg-gradient-to-br from-blue-200 to-blue-400 p-4 min-h-[70px] flex flex-col justify-between shadow-md transition hover:scale-[1.01]"
               >
                 <div className="text-white font-medium">{item.title}</div>
                 <div className="text-white text-xs mt-2">{item.date}</div>
@@ -114,7 +104,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Próximas Elecciones */}
-        <h2 className="text-2xl font-semibold mt-10 mb-4">Próximas Elecciones</h2>
+        <h2 className="text-2xl font-semibold mt-10 mb-4 text-pblack">Próximas Elecciones</h2>
         <div className="flex gap-12 flex-wrap max-w-5xl mx-auto justify-between">
           {elections.map((el) => (
             <Link
@@ -142,12 +132,12 @@ export default function DashboardPage() {
         <section className="mt-10 px-4 py-8 ">
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-900">Perfiles destacados</h2>
+              <h2 className="text-2xl font-semibold text-pblack">Perfiles destacados</h2>
               <p className="text-sm text-slate-500">Explora los perfiles y descubre sus propuestas antes de votar.</p>
             </div>
             
           </div>
-          <h2 className="px-6 text-xl font-medium text-slate-900 mb-4">Postulados</h2>
+          <h2 className="px-6 text-xl font-medium text-pblack mb-4">Postulados</h2>
 
           <div className="px-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
 
@@ -173,7 +163,11 @@ export default function DashboardPage() {
             </Link>
           </div>
         </section>
+        
       </main>
+      <footer>
+        <Footer />
+      </footer>
     </div>
   );
 }

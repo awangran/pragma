@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "./ui/button";
 
-export function Navbar() {
+export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
   return (
     <nav className="w-full flex items-center justify-between px-8 py-4 bg-white border-b">
       <div className="flex items-center gap-4">
@@ -45,13 +45,20 @@ export function Navbar() {
         </Link>
       </div>
       <div className="flex items-center gap-6">
-        <Button
-          variant="outline"
-          className="border-2 border-blue-400 text-blue-500 font-medium rounded-full px-8 py-2 hover:bg-blue-50"
-        >
-          Regístrate
-        </Button>
-        <div className="w-10 h-10 rounded-full bg-[#181C32]" />
+        {!user ? (
+          <Button
+            variant="outline"
+            className="border-2 border-blue-400 text-blue-500 font-medium rounded-full px-8 py-2 hover:bg-blue-50"
+          >
+            Regístrate
+          </Button>
+        ) : (
+          <div
+            className="h-10 w-10 rounded-full bg-pblue ring-2 ring-white"
+            title="Perfil"
+            aria-hidden
+          />
+        )}
       </div>
     </nav>
   );

@@ -70,7 +70,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ name, party, profileLink,
   return (
     <Link
       href={profileLink}
-      className="flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition hover:shadow-md"
+      className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 shadow-sm transition hover:shadow-md"
     >
       {showAvatar ? (
         <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-slate-200">
