@@ -3,7 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
+import CandidateCard from "../../components/candidate-card";
+import {candidates} from "../../data/candidates";
+import type { Candidate } from "../../types/candidates";
 
+// User authentication check
 async function UserAuthCheck() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
@@ -15,7 +19,7 @@ async function UserAuthCheck() {
   return null;
 }
 
-// Placeholder data
+// Placeholder data for news
 const news = [
   {
     id: 1,
@@ -44,6 +48,7 @@ const news = [
   },
 ];
 
+// Placeholder data for elections
 const elections = [
   {
     id: 1,
@@ -127,11 +132,47 @@ export default function DashboardPage() {
         <div className="flex justify-center mt-8">
           <Link
             href="/articulos"
-            className="border-2 border-blue-400 text-blue-500 font-medium rounded-full px-8 py-2 hover:bg-blue-50 transition"
+            className="w-md border-2 border-blue-400 text-blue-500 font-medium rounded-full px-8 py-2 hover:bg-blue-50 transition"
           >
             Ver más artículos
           </Link>
         </div>
+
+        {/* Candidate Cards Section */}
+        <section className="mt-10 px-4 py-8 ">
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-slate-900">Perfiles destacados</h2>
+              <p className="text-sm text-slate-500">Explora los perfiles y descubre sus propuestas antes de votar.</p>
+            </div>
+            
+          </div>
+          <h2 className="px-6 text-xl font-medium text-slate-900 mb-4">Postulados</h2>
+
+          <div className="px-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+
+            {candidates.map((candidate) => (
+              <CandidateCard
+                key={candidate.id}
+                id={candidate.id}
+                name={candidate.name}
+                subtitle={candidate.subtitle}
+                party={candidate.party}
+                profileLink={candidate.profileLink}
+                avatarUrl={candidate.avatarUrl}
+              />
+            ))}
+          </div>
+
+          <div className="flex justify-center mt-4">
+            <Link
+              href="/candidatos"
+              className="w-md  border-2 border-blue-400 text-blue-500 font-medium rounded-full px-8 py-2 hover:bg-blue-50 transition"
+            >
+              Ver todos
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );
