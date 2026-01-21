@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { candidates } from "../../data/candidates";
-
+import Footer from "@/components/footer";
 
 // how to fix the the suspense error aside from using this func? ifkkk
 async function NavbarWithUser() {
@@ -36,8 +36,11 @@ const filterLinks = [
 ];
 
 export default async function CandidatesPage() {
+  const activeCandidates = candidates.filter((c) => c.retirado === false);
+  const retiredCandidates = candidates.filter((c) => c.retirado === true);
   return (
-    <div className="flex flex-col items-center p-4">
+    <div className=" w-full flex flex-col gap-12">
+      <main className="flex flex-col items-center p-4"> 
       <Suspense fallback={<Navbar user={null} />}>
         <NavbarWithUser />
       </Suspense>
@@ -73,7 +76,7 @@ export default async function CandidatesPage() {
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-pblack">Postulados</h3>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {candidates.map((candidate) => (
+            {activeCandidates.map((candidate) => (
               <CandidateCard
                 key={candidate.id}
                 id={candidate.id}
@@ -86,7 +89,32 @@ export default async function CandidatesPage() {
             ))}
           </div>
         </div>
+
+        {retiredCandidates.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-pblack">Retirados</h3>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {retiredCandidates.map((candidate) => (
+                <CandidateCard
+                  key={candidate.id}
+                  id={candidate.id}
+                  name={candidate.name}
+                  subtitle={candidate.subtitle}
+                  party={candidate.party}
+                  profileLink={candidate.profileLink}
+                  avatarUrl={candidate.avatarUrl}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </section>
+
+   </main>
+      <footer>
+        <Footer />
+      </footer>
+ 
     </div>
   );
 }

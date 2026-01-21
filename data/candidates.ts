@@ -27,7 +27,7 @@ export const candidates = [
     party: "Partido Verde",
     profileLink: "/candidatos/carlos-lopez",
     avatarUrl: "/avatars/juan-perez.jpg",
-    retirado: false,
+    retirado: true,
   },
   {
     id: 4,

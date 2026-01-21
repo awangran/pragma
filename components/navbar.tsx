@@ -19,7 +19,6 @@ export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
           className="relative text-lg font-medium text-[#181C32] hover:text-blue-600 transition-colors"
         >
           Inicio
-          <span className="absolute left-0 -bottom-1 w-full h-0.5 bg-blue-400 rounded-full"></span>
         </Link>
         <Link
           href="/candidatos"
