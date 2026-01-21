@@ -5,6 +5,8 @@ import Image from "next/image";
 import { Button } from "./ui/button";
 
 export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
+
+
   return (
     <nav className="w-full flex items-center justify-between px-8 py-4 bg-white border-b">
       <div className="flex items-center gap-4">

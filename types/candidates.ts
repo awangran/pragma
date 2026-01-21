@@ -3,5 +3,8 @@ export interface Candidate {
   name: string;
   party: string;
   profileLink: string;
-  avatarUrl: string;
+  slug: string;
+  subtitle?: string;
+  avatarUrl?: string;
+  retirado?: boolean;
 }

@@ -72,7 +72,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
-      <Navbar user={user ? { avatarUrl } : undefined} />
+      <Navbar user={user ? { avatarUrl } : null} />
       <main className="px-12 py-4">
         {/* Noticias */}
         <h2 className="text-2xl font-semibold mb-4 text-pblack">Noticias</h2>
