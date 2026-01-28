@@ -1,4 +1,4 @@
-export interface Candidate {
+export type Candidate = {
   id: number;
   name: string;
   party: string;
@@ -7,4 +7,10 @@ export interface Candidate {
   subtitle?: string;
   avatarUrl?: string;
   retirado?: boolean;
+  like?: number;
+  saved?: number;
+  bio?: string;
+  twitter?: string;
+  propuestas?: Array<{ id: string; title: string; topic?: string; summary?: string }>;
+  links?: string[];
 }

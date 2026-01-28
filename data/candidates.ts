@@ -39,4 +39,14 @@ export const candidates = [
     avatarUrl: "/avatars/juan-perez.jpg",
     retirado: true,
   },
+  {
+    id: 5,
+    name: "Ashlee Yin",
+    slug: "ashlee-yin",
+    subtitle: "Candidata presidencial",
+    party: "Partido Independiente",
+    profileLink: "/candidatos/ashlee-yin",
+    avatarUrl: "/avatars/ashlee-yin.jpg",
+    retirado: true,
+  },
 ];
