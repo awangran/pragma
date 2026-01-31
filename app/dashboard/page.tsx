@@ -66,10 +66,11 @@ const elections = [
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  const user = (data && (data as any).user) ? (data as any).user : null;
+  const { data: userData } = await supabase.auth.getUser();
+  const user = (userData && (userData as any).user) ? (userData as any).user : null;
   const avatarUrl = user?.user_metadata?.avatar_url ?? null;
-
+  const { data: candidatesData } = await supabase.from("candidates").select();
+  const candidates = (candidatesData ?? []) as any[];
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
       <Navbar user={user ? { avatarUrl } : null} />

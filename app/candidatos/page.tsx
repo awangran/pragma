@@ -4,7 +4,6 @@ import CandidateCard from "@/components/candidate-card";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
-import { candidates } from "../../data/candidates";
 import Footer from "@/components/footer";
 
 // how to fix the the suspense error aside from using this func? ifkkk
@@ -36,8 +35,12 @@ const filterLinks = [
 ];
 
 export default async function CandidatesPage() {
-  const activeCandidates = candidates.filter((c) => c.retirado === false);
-  const retiredCandidates = candidates.filter((c) => c.retirado === true);
+  const supabase = await createClient();
+  const { data } = await supabase.from("candidates").select();
+  const candidates = (data ?? []) as any[];
+
+  const activeCandidates = candidates.filter((c) => c?.retirado !== true);
+  const retiredCandidates = candidates.filter((c) => c?.retirado === true);
   return (
     <div className=" w-full flex flex-col gap-12">
       <main className="flex flex-col items-center p-4"> 

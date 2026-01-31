@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "./ui/button";
+import { User } from "lucide-react";
 
 export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
 
@@ -32,12 +33,12 @@ export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
         >
           Eventos
         </Link>
-        <Link
+        {/* <Link
           href="/semaforo"
           className="text-lg font-medium text-[#181C32] hover:text-blue-600 transition-colors"
         >
           Semáforo
-        </Link>
+        </Link> */}
         <Link
           href="/articulos"
           className="text-lg font-medium text-[#181C32] hover:text-blue-600 transition-colors"
@@ -54,11 +55,22 @@ export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
             Regístrate
           </Button>
         ) : (
-          <div
-            className="h-10 w-10 rounded-full bg-pblue ring-2 ring-white"
-            title="Perfil"
-            aria-hidden
-          />
+          user?.avatarUrl ? (
+            <Image
+              src={user.avatarUrl}
+              alt="Perfil"
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-full ring-2 ring-white object-cover"
+            />
+          ) : (
+            <div
+              className="h-10 w-10 rounded-full bg-pblue ring-2 ring-white flex items-center justify-center"
+              title="Perfil"
+            >
+              <User className="h-5 w-5 text-white" aria-hidden />
+            </div>
+          )
         )}
       </div>
     </nav>
