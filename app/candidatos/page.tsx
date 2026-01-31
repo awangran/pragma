@@ -5,6 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import Footer from "@/components/footer";
+import CandidatesFilterClient from "@/components/candidates-filter-client";
 
 // how to fix the the suspense error aside from using this func? ifkkk
 async function NavbarWithUser() {
@@ -39,8 +40,8 @@ export default async function CandidatesPage() {
   const { data } = await supabase.from("candidates").select();
   const candidates = (data ?? []) as any[];
 
-  const activeCandidates = candidates.filter((c) => c?.retirado !== true);
-  const retiredCandidates = candidates.filter((c) => c?.retirado === true);
+  /* const activeCandidates = candidates.filter((c) => c?.retirado !== true);
+  const retiredCandidates = candidates.filter((c) => c?.retirado === true); */
   return (
     <div className=" w-full flex flex-col gap-12">
       <main className="flex flex-col items-center p-4"> 
@@ -49,8 +50,10 @@ export default async function CandidatesPage() {
       </Suspense>
 
       <h1 className="text-4xl font-semibold mt-12 mb-6">Candidatos</h1>
-      <p className="max-w-3xl text-center mx-12"> Aquí se encontrará una descripción de la página de candidatos donde se da un poco de contexto sobre esta, los partidos involucrados, quienes pueden votar etc...</p>
-      
+      <p className="max-w-3xl text-center mx-12"> Explora perfiles, propuestas y seguimiento de cumplimiento
+
+</p>
+      {/* 
       <div className="mt-8 mb-10 flex flex-wrap items-center justify-center gap-4">
         {filterLinks.map((filter) => (
           <Button
@@ -63,7 +66,7 @@ export default async function CandidatesPage() {
             <a href={filter.href}>{filter.label}</a>
           </Button>
         ))}
-      </div>
+      </div> */}
 
       <section
         id="presidencial"
@@ -77,40 +80,9 @@ export default async function CandidatesPage() {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-pblack">Postulados</h3>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {activeCandidates.map((candidate) => (
-              <CandidateCard
-                key={candidate.id}
-                id={candidate.id}
-                name={candidate.name}
-                subtitle={candidate.subtitle}
-                party={candidate.party}
-                profileLink={candidate.profileLink}
-                avatarUrl={candidate.avatarUrl}
-              />
-            ))}
-          </div>
+          <CandidatesFilterClient candidates={candidates as any} />
         </div>
 
-        {retiredCandidates.length > 0 && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-pblack">Retirados</h3>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {retiredCandidates.map((candidate) => (
-                <CandidateCard
-                  key={candidate.id}
-                  id={candidate.id}
-                  name={candidate.name}
-                  subtitle={candidate.subtitle}
-                  party={candidate.party}
-                  profileLink={candidate.profileLink}
-                  avatarUrl={candidate.avatarUrl}
-                />
-              ))}
-            </div>
-          </div>
-        )}
       </section>
 
    </main>

@@ -5,6 +5,7 @@ import CandidateCard from "../../../components/candidate-card";
 import type { Candidate } from "../../../types/candidates";
 import { createClient } from "@/lib/supabase/server";
 import CandidateProfileClient from "../../../components/candidate-profile-client";
+import { MapPin } from "lucide-react";
 
 interface CandidateProfilePageProps {
   params: Promise<{ slug: string }>;
@@ -45,11 +46,14 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
           </nav>
 
           {/* Header */}
-          <div className="relative mb-6 rounded-2xl bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 p-6">
+          <div
+            className="relative mb-6 rounded-2xl p-6 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: "url('/soft-gradient.svg')" }}
+          >
             <div className="flex items-center gap-6">
               {/* Avatar */}
               {candidate.avatarUrl ? (
-                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-lg">
+                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full shadow-lg">
                   <Image
                     src={candidate.avatarUrl as string}
                     alt={`profile photo`}
@@ -63,15 +67,23 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
               )}
 
               {/* Main identity */}
-              <div className="flex flex-1 items-start justify-between gap-4">
+              <div className="flex flex-1 items-start justify-between gap-4 py-6">
                 <div className="flex flex-col">
                   <h1 className="text-3xl font-bold text-slate-900">{candidate.name}</h1>
                   {candidate.subtitle && (
                     <p className="text-base text-slate-600 mt-1">{candidate.subtitle}</p>
                   )}
-                  <span className="mt-3 inline-flex w-max items-center justify-center rounded-full border border-blue-300 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700">
-                    {candidate.party}
-                  </span>
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className="inline-flex w-max items-center justify-center rounded-full border border-blue-300 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700">
+                      {candidate.party}
+                    </span>
+                    {candidate.ubicacion && (
+                      <span className="inline-flex items-center gap-1 text-sm text-slate-700">
+                        <MapPin className="h-4 w-4 text-slate-500" aria-hidden />
+                        {candidate.ubicacion}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Actions 
@@ -107,7 +119,11 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
                   </p>
 
                   <div className="flex flex-col gap-4">
-                    {(candidate.propuestas ?? []).map((p, idx) => (
+                    {(candidate.propuestas ?? []).map(
+                      (
+                        p: { id: string; title: string; topic?: string; summary?: string },
+                        idx: number,
+                      ) => (
                       <div key={p.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                         <h3 className="text-sm font-semibold text-slate-900">
                           {idx + 1}. {p.title}
@@ -121,7 +137,8 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
                           <p className="mt-1 text-sm text-slate-700">{p.summary}</p>
                         )}
                       </div>
-                    ))}
+                      ),
+                    )}
                     {(!candidate.propuestas || candidate.propuestas.length === 0) && (
                       <p className="text-sm text-slate-600">Sin propuestas registradas.</p>
                     )}
@@ -131,16 +148,16 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
 
               {/* Right column */}
               <aside className="col-span-12 lg:col-span-4">
-                {/* Últimos Posts */}
+                {/* Últimos Posts 
                 <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <h3 className="mb-3 text-sm font-semibold text-slate-900">Últimos Posts</h3>
-                </div>
+                </div>*/}
 
                 {/* Links relacionados */}
                 <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <h3 className="mb-3 text-sm font-semibold text-slate-900">Links relacionados</h3>
                   <ul className="flex flex-col gap-2">
-                    {(candidate.links ?? []).map((href, i) => (
+                    {(candidate.links ?? []).map((href: string, i: number) => (
                       <li key={`${href}-${i}`}>
                         <a
                           href={href.startsWith("http") ? href : `https://${href}`}
@@ -162,7 +179,8 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
                 <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <h3 className="mb-3 text-sm font-semibold text-slate-900">Filtrar por tema</h3>
                   <div className="flex flex-wrap gap-2">
-                    {(candidate.propuestas ?? []).map((p) => (
+                    {(candidate.propuestas ?? []).map(
+                      (p: { id: string; title: string; topic?: string; summary?: string }) => (
                       p.topic && (
                         <span
                           key={p.topic}
@@ -171,7 +189,8 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
                           {p.topic}
                         </span>
                       )
-                    ))}
+                      ),
+                    )}
                     {(!candidate.propuestas || candidate.propuestas.length === 0) && (
                       <span className="text-sm text-slate-600">Sin temas disponibles.</span>
                     )}

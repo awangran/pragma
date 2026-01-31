@@ -3,8 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import CandidateCard from "../../components/candidate-card";
-import {candidates} from "../../data/candidates";
-import type { Candidate } from "../../types/candidates";
 import Footer from "@/components/footer";
 
 // Placeholder data for news

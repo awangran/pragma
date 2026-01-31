@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { MapPin } from "lucide-react";
 
 interface CandidateCardProps {
   id: number;
@@ -11,7 +12,7 @@ interface CandidateCardProps {
   profileLink: string;
   subtitle?: string;
   avatarUrl?: string;
-}
+  location?: string;}
 
 const DEFAULT_THEME = {
   badgeBg: "bg-blue-50",
@@ -54,7 +55,7 @@ const isValidImageUrl = (url: string) => {
   return !!sanitized && /\.(png|jpe?g|gif|bmp|webp|avif|svg)$/.test(sanitized);
 };
 
-const CandidateCard: React.FC<CandidateCardProps> = ({ name, party, profileLink, subtitle, avatarUrl }) => {
+const CandidateCard: React.FC<CandidateCardProps> = ({ name, party, profileLink, subtitle, avatarUrl, location }) => {
   const theme = getPartyTheme(party);
   const [imageError, setImageError] = useState(false);
 
@@ -63,7 +64,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ name, party, profileLink,
   const hasValidAvatar = !!(avatarUrl && isValidImageUrl(avatarUrl));
   const showAvatar = hasValidAvatar && !imageError;
 
-  const badgeClasses = `w-3/4 inline-flex items-center justify-center rounded-md border px-2.5 py-0.5 text-xs font-medium ${theme.badgeBg} ${theme.badgeBorder} ${theme.badgeText}`;
+  const badgeClasses = `inline-flex items-center justify-center rounded-md border px-2.5 py-0.5 text-xs font-medium ${theme.badgeBg} ${theme.badgeBorder} ${theme.badgeText}`;
   const errorCircleClasses = `h-16 w-16 shrink-0 rounded-full ${theme.circle}`;
   const placeholderCircleClasses = "h-12 w-12 shrink-0 rounded-full bg-gray-200";
 
@@ -93,7 +94,15 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ name, party, profileLink,
           <span className="text-md font-semibold text-slate-900">{name}</span>
           {subtitle && <span className="text-sm text-slate-500">{subtitle}</span>}
         </div>
-        <span className={badgeClasses}>{party}</span>
+        <div className="flex items-center gap-2">
+          <span className={badgeClasses}>{party}</span>
+          {location && (
+            <span className="inline-flex items-center gap-1 text-xs text-slate-600">
+              <MapPin className="h-3.5 w-3.5 text-slate-500" aria-hidden />
+              {location}
+            </span>
+          )}
+        </div>
       </div>
     </Link>
   );
