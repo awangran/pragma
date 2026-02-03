@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { User } from "lucide-react";
+import { LogoutButton } from "./logout-button";
 
 export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
 
@@ -50,27 +51,30 @@ export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
         {!user ? (
           <Button
             variant="outline"
-            className="border-2 border-blue-400 text-blue-500 font-medium rounded-full px-8 py-2 hover:bg-blue-50"
+            className="border-2 border-pskyblue text-pblue font-medium rounded-full px-8 py-2 hover:bg-pskyblue/30"
           >
             Regístrate
           </Button>
         ) : (
-          user?.avatarUrl ? (
-            <Image
-              src={user.avatarUrl}
-              alt="Perfil"
-              width={40}
-              height={40}
-              className="h-10 w-10 rounded-full ring-2 ring-white object-cover"
-            />
-          ) : (
-            <div
-              className="h-10 w-10 rounded-full bg-pblue ring-2 ring-white flex items-center justify-center"
-              title="Perfil"
-            >
-              <User className="h-5 w-5 text-white" aria-hidden />
-            </div>
-          )
+          <>
+            {user?.avatarUrl ? (
+              <Image
+                src={user.avatarUrl}
+                alt="Perfil"
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-full ring-2 ring-white object-cover"
+              />
+            ) : (
+              <div
+                className="h-10 w-10 rounded-full bg-pblue ring-2 ring-white flex items-center justify-center"
+                title="Perfil"
+              >
+                <User className="h-5 w-5 text-white" aria-hidden />
+              </div>
+            )}
+            <LogoutButton />
+          </>
         )}
       </div>
     </nav>
