@@ -42,46 +42,47 @@ const Footer = () => (
           </div>
         </section>
       
-      <div className="relative flex w-full flex-col gap-10 px-32 py-12 text-pdarkblue md:flex-row md:items-start md:justify-between">
-        <div className="flex flex-col gap-6">
+      <div className="relative flex w-full flex-col gap-8 sm:gap-10 px-4 sm:px-6 md:px-8 lg:px-32 py-8 sm:py-12 text-pdarkblue md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col gap-6 min-w-fit">
           <div className="flex items-center gap-3">
-            <Image src="/pragma-logo.svg" alt="Pragma Logo" width={52} height={52} />
+            <Image src="/pragma-logo.svg" alt="Pragma Logo" width={52} height={52} className="w-12 sm:w-13 md:w-13" />
             <div className="flex flex-col">
-              <span className="text-2xl font-semibold text-pblack">Pragma</span>
-              <span className="text-base text-pblack"></span>
+              <span className="text-lg sm:text-xl md:text-2xl font-semibold text-pblack">Pragma</span>
+              <span className="text-xs sm:text-sm md:text-base text-pblack"></span>
             </div>
           </div>
-          <div className="flex gap-4 text-xl">
+          <div className="flex gap-4 text-lg sm:text-xl">
             {socialLinks.map(({ href, label, Icon }) => (
-              <Link key={label} href={href} aria-label={label} target={href.startsWith("http") ? "_blank" : undefined}>
+              <Link key={label} href={href} aria-label={label} target={href.startsWith("http") ? "_blank" : undefined} className="hover:text-pblue transition-colors">
                 <Icon />
               </Link>
             ))}
           </div>
         </div>
-        <nav className="grid gap-8 text-lg font-medium md:grid-cols-2">
+        <nav className="grid gap-6 sm:gap-8 text-sm sm:text-base md:text-lg font-medium grid-cols-2 md:grid-cols-2">
           <ul className="flex flex-col gap-2">
             {primaryLinks.map((link) => (
               <li key={link.label}>
-                <Link href={link.href}>{link.label}</Link>
+                <Link href={link.href} className="hover:text-pblue transition-colors">{link.label}</Link>
               </li>
             ))}
           </ul>
           <ul className="flex flex-col gap-2">
             {secondaryLinks.map((link) => (
               <li key={link.label}>
-                <Link href={link.href}>{link.label}</Link>
+                <Link href={link.href} className="hover:text-pblue transition-colors">{link.label}</Link>
               </li>
             ))}
           </ul>
         </nav>
       </div>
     </div>
-    <div className="flex w-full flex-col gap-2 bg-pdarkblue px-8 py-3 text-sm text-pblue md:flex-row md:items-center md:justify-between">
-      <span>@2026 Pragma</span>
-      <div className="flex items-center gap-4">
-        <Link href="/politica-de-privacidad">Política de Privacidad</Link>
-        <Link href="/terminos">Terms</Link>
+    <div className="flex w-full flex-col gap-3 sm:gap-2 bg-pdarkblue px-4 sm:px-6 md:px-8 lg:px-32 py-4 sm:py-3 text-xs sm:text-sm text-pblue md:flex-row md:items-center md:justify-between">
+      <span className="order-2 md:order-1">@2026 Pragma</span>
+      <div className="flex items-center gap-2 sm:gap-4 flex-wrap order-1 md:order-2">
+        <Link href="/politica-de-privacidad" className="hover:text-white transition-colors">Política de Privacidad</Link>
+        <span className="hidden sm:inline text-white/50">•</span>
+        <Link href="/terminos" className="hover:text-white transition-colors">Terms</Link>
       </div>
     </div>
   </footer>
