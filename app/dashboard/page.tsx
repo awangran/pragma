@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
@@ -80,6 +81,7 @@ const quickAccess = [
 ];
 
 export default async function DashboardPage() {
+
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = (userData && (userData as any).user) ? (userData as any).user : null;
@@ -91,7 +93,9 @@ export default async function DashboardPage() {
   
   return (
     <div className="flex-1 w-full flex flex-col">
-      <Navbar user={user ? { avatarUrl } : null} />
+      <Suspense fallback={<Navbar user={null} />}>
+        <Navbar user={user ? { avatarUrl } : null} />
+      </Suspense>
       <main className="px-0">
         {/* Hero Section (solid background) */}
         <section className="relative overflow-hidden bg-pdarkblue text-white bg-cover bg-center bg-no-repeat"
@@ -126,9 +130,12 @@ export default async function DashboardPage() {
           </div>
         </section>
 
+        
+      
         {/* Quick Access */}
         <section className="py-12 bg-white border-b">
           <div className="container mx-auto px-6">
+            <Suspense fallback={<div>Loading users...</div>}> 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {quickAccess.map(({ id, title, desc, href, Icon }) => (
                 <Link key={id} href={href} className="group">
@@ -148,6 +155,7 @@ export default async function DashboardPage() {
                 </Link>
               ))}
             </div>
+            </Suspense>
           </div>
         </section>
 
@@ -167,6 +175,7 @@ export default async function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Suspense fallback={<div>Loading users...</div>}> 
               {news.map((n) => (
                 <Card key={n.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
@@ -183,6 +192,7 @@ export default async function DashboardPage() {
                   </CardContent>
                 </Card>
               ))}
+              </Suspense>
             </div>
           </div>
         </section>
@@ -240,7 +250,22 @@ export default async function DashboardPage() {
             
             </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <Suspense
+            fallback={
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-4 rounded-2xl px-5 py-4 shadow-sm">
+                    <div className="h-12 w-12 rounded-full bg-slate-200" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-1/3 bg-slate-200 rounded" />
+                      <div className="h-3 w-1/4 bg-slate-100 rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            }
+          >
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {candidates.map((candidate) => (
                 <CandidateCard
                   key={candidate.id}
@@ -253,6 +278,7 @@ export default async function DashboardPage() {
                 />
               ))}
             </div>
+          </Suspense>
             </div>
           
 
@@ -269,7 +295,9 @@ export default async function DashboardPage() {
         </section>      
       </main>
       <footer>
-        <Footer />
+        <Suspense fallback={<div className="px-8 py-6 text-sm text-slate-500">Cargando pie de página…</div>}>
+          <Footer />
+        </Suspense>
       </footer>
     </div>
   );
