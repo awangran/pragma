@@ -52,7 +52,8 @@ export default async function CandidatesPage() {
       <h1 className="text-4xl font-semibold mt-12 mb-6">Candidatos</h1>
       <p className="max-w-3xl text-center mx-12"> Explora perfiles, propuestas y seguimiento de cumplimiento
 
-</p>
+      </p>
+
       {/* 
       <div className="mt-8 mb-10 flex flex-wrap items-center justify-center gap-4">
         {filterLinks.map((filter) => (
@@ -80,14 +81,33 @@ export default async function CandidatesPage() {
         </div>
 
         <div className="space-y-4">
-          <CandidatesFilterClient candidates={candidates as any} />
+          <Suspense
+            fallback={
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-4 rounded-2xl px-5 py-4 shadow-sm">
+                    <div className="h-12 w-12 rounded-full bg-slate-200" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-1/3 bg-slate-200 rounded" />
+                      <div className="h-3 w-1/4 bg-slate-100 rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            }
+          >
+            <CandidatesFilterClient candidates={candidates as any} />
+          </Suspense>
+
         </div>
 
       </section>
 
    </main>
       <footer>
-        <Footer />
+        <Suspense fallback={<div className="px-8 py-6 text-sm text-slate-500">Cargando pie de página…</div>}>
+          <Footer />
+        </Suspense>
       </footer>
  
     </div>
