@@ -15,9 +15,10 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
   const supabase = await createClient();
   const { data: candidatos } = await supabase.from("candidates").select();
   console.log("Candidatos desde Supabase:", candidatos);
-
   const { slug } = await params;
-  const candidate = candidatos?.find((c) => c.slug === slug);
+  console.log(slug)
+
+  const candidate = candidatos?.find((c) => c.profileLink === "candidatos/"+ slug);
 
   if (!candidate) {
     return <div className="p-8 text-center">Candidato no encontrado.</div>;

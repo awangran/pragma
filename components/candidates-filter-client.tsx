@@ -116,7 +116,7 @@ export default function CandidatesFilterClient({ candidates }: Props) {
             party={candidate.party}
             profileLink={candidate.profileLink}
             avatarUrl={candidate.avatarUrl}
-            location={candidate.location ?? candidate.region ?? candidate.ubicacion}
+            location={candidate.ubicacion}
           />
         ))}
       </div>
