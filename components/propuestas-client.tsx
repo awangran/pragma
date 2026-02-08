@@ -10,7 +10,7 @@ import {
 
 interface Propuesta {
   id: string;
-  titulo: titulo;
+  titulo: string;
   tema_id: string | number | null;
   que_pasa: string | null;
   que_propone: string | null;
