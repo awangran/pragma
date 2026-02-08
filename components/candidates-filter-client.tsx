@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import type { Candidate } from "@/types/candidates";
+import type { Tema } from "@/types/tema";
+
 import CandidateCard from "@/components/candidate-card";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,27 +16,17 @@ import { Search, ChevronDown } from "lucide-react";
 
 type Props = {
   candidates: Candidate[];
+  temas: Tema[];
 };
 
-export default function CandidatesFilterClient({ candidates }: Props) {
+export default function CandidatesFilterClient({ candidates, temas }: Props) {
   const [query, setQuery] = useState("");
-  const [topic, setTopic] = useState<string | null>(null);
   const [region, setRegion] = useState<string | null>(null);
-
-  const topics = useMemo(() => {
-    const set = new Set<string>();
-    for (const c of candidates) {
-      for (const p of c.propuestas ?? []) {
-        if (p.topic) set.add(p.topic);
-      }
-    }
-    return Array.from(set).sort();
-  }, [candidates]);
 
   const regions = useMemo(() => {
     const set = new Set<string>();
     for (const c of candidates as any[]) {
-      const r = c.location ?? c.region ?? c.ubicacion;
+      const r = c.ubicacion;
       if (r && typeof r === "string") set.add(r);
     }
     return Array.from(set).sort();
@@ -44,16 +36,14 @@ export default function CandidatesFilterClient({ candidates }: Props) {
     const q = query.trim().toLowerCase();
     return (candidates ?? []).filter((c: any) => {
       const matchesQuery = !q
-        || c.name?.toLowerCase().includes(q)
-        || c.subtitle?.toLowerCase().includes(q)
-        || c.party?.toLowerCase().includes(q);
-      const matchesTopic = !topic
-        || (c.propuestas ?? []).some((p: any) => p?.topic === topic);
-      const candidateRegion = c.location ?? c.region ?? c.ubicacion;
+        || c.nombre?.toLowerCase().includes(q)
+        || c.cargo?.toLowerCase().includes(q)
+        || c.partido?.toLowerCase().includes(q);
+      const candidateRegion = c.ubicacion;
       const matchesRegion = !region || candidateRegion === region;
-      return matchesQuery && matchesTopic && matchesRegion;
+      return matchesQuery && matchesRegion;
     });
-  }, [candidates, query, topic, region]);
+  }, [candidates, query, region]);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -63,28 +53,11 @@ export default function CandidatesFilterClient({ candidates }: Props) {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por nombre o cargo..."
+            placeholder="Buscar por nombre, cargo o partido..."
             className="h-11 rounded-xl bg-slate-50 pl-9 text-sm"
           />
         </div>
         <div className="flex items-center gap-3">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="h-11 rounded-xl bg-slate-50 px-4 text-sm font-medium text-slate-800 shadow-sm inline-flex items-center gap-2">
-                {topic ?? "Todos los temas"}
-                <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => setTopic(null)}>Todos los temas</DropdownMenuItem>
-              {topics.map((t) => (
-                <DropdownMenuItem key={t} onClick={() => setTopic(t)}>
-                  {t}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="h-11 rounded-xl bg-slate-50 px-4 text-sm font-medium text-slate-800 shadow-sm inline-flex items-center gap-2">
@@ -107,16 +80,15 @@ export default function CandidatesFilterClient({ candidates }: Props) {
       <p className="text-sm text-slate-700">Mostrando {filtered.length} resultados</p>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {filtered.map((candidate: any) => (
+        {filtered.map((candidate: any, index: number) => (
           <CandidateCard
-            key={candidate.id}
-            id={candidate.id}
-            name={candidate.name}
-            subtitle={candidate.subtitle}
-            party={candidate.party}
-            profileLink={candidate.profileLink}
-            avatarUrl={candidate.avatarUrl}
-            location={candidate.location ?? candidate.region ?? candidate.ubicacion}
+            key={candidate.id ?? candidate.nombre ?? index}
+            id={candidate.id ?? index}
+            nombre={candidate.nombre}
+            cargo={candidate.cargo}
+            partido={candidate.partido}
+            avatar={candidate.avatar}
+            ubicacion={candidate.ubicacion}
           />
         ))}
       </div>

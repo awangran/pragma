@@ -7,12 +7,12 @@ import { MapPin } from "lucide-react";
 
 interface CandidateCardProps {
   id: number;
-  name: string;
-  party: string;
-  profileLink: string;
-  subtitle?: string;
-  avatarUrl?: string;
-  location?: string;}
+  nombre: string;
+  cargo: string;
+  partido: string;
+  ubicacion?: string;
+  avatar?: string;
+}
 
 const DEFAULT_THEME = {
   badgeBg: "bg-blue-50",
@@ -50,19 +50,17 @@ const PARTY_THEME: Record<string, typeof DEFAULT_THEME> = {
 
 const getPartyTheme = (party: string) => PARTY_THEME[party] ?? DEFAULT_THEME;
 
-const isValidImageUrl = (url: string) => {
-  const sanitized = url.split("?")[0].trim().toLowerCase();
-  return !!sanitized && /\.(png|jpe?g|gif|bmp|webp|avif|svg)$/.test(sanitized);
-};
 
-const CandidateCard: React.FC<CandidateCardProps> = ({ name, party, profileLink, subtitle, avatarUrl, location }) => {
-  const theme = getPartyTheme(party);
+
+const CandidateCard: React.FC<CandidateCardProps> = ({ id, nombre, cargo, partido, avatar, ubicacion }) => {
+  const theme = getPartyTheme(partido);
   const [imageError, setImageError] = useState(false);
 
-  useEffect(() => setImageError(false), [avatarUrl]);
+  const slug = `/candidatos/${id}`;
 
-  const hasValidAvatar = !!(avatarUrl && isValidImageUrl(avatarUrl));
-  const showAvatar = hasValidAvatar && !imageError;
+  useEffect(() => setImageError(false), [avatar]);
+
+  const showAvatar = !!avatar && !imageError;
 
   const badgeClasses = `inline-flex items-center justify-center rounded-md border px-2.5 py-0.5 text-xs font-medium ${theme.badgeBg} ${theme.badgeBorder} ${theme.badgeText}`;
   const errorCircleClasses = `h-16 w-16 shrink-0 rounded-full ${theme.circle}`;
@@ -70,36 +68,35 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ name, party, profileLink,
 
   return (
     <Link
-      href={profileLink}
+      href={slug}
       className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 shadow-sm transition hover:shadow-md"
     >
       {showAvatar ? (
         <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-slate-200">
           <Image
-            src={avatarUrl as string}
-            alt={`${name} profile photo`}
+            src={avatar as string}
+            alt={`${nombre} profile photo`}
             width={48}
             height={48}
             className="h-full w-full object-cover"
             onError={() => setImageError(true)}
           />
         </div>
-      ) : hasValidAvatar ? (
-        <div className={errorCircleClasses} aria-hidden />
       ) : (
         <div className={placeholderCircleClasses} aria-hidden />
       )}
+
       <div className="flex flex-1 flex-col gap-1">
         <div className="flex flex-col">
-          <span className="text-md font-semibold text-slate-900">{name}</span>
-          {subtitle && <span className="text-sm text-slate-500">{subtitle}</span>}
+          <span className="text-md font-semibold text-slate-900">{nombre}</span>
+          {cargo && <span className="text-sm text-slate-500">{cargo}</span>}
         </div>
         <div className="flex items-center gap-2">
-          <span className={badgeClasses}>{party}</span>
-          {location && (
+          <span className={badgeClasses}>{partido}</span>
+          {ubicacion && (
             <span className="inline-flex items-center gap-1 text-xs text-slate-600">
               <MapPin className="h-3.5 w-3.5 text-slate-500" aria-hidden />
-              {location}
+              {ubicacion}
             </span>
           )}
         </div>

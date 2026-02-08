@@ -63,7 +63,7 @@ export function SignUpForm({
         },
       });
       if (error) throw error;
-      router.push("/protected");
+      router.push("/dashboard");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -135,6 +135,7 @@ export function SignUpForm({
                   <option value="Arauca">Arauca</option>
                   <option value="Bolívar">Bolívar</option>
                   <option value="Boyacá">Boyacá</option>
+                  <option value="Boyacá">Bogotá</option>
                   <option value="Caldas">Caldas</option>
                   <option value="Cauca">Cauca</option>
                   <option value="Cesar">Cesar</option>

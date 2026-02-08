@@ -86,7 +86,7 @@ export default async function DashboardPage() {
   const { data: userData } = await supabase.auth.getUser();
   const user = (userData && (userData as any).user) ? (userData as any).user : null;
   const avatarUrl = user?.user_metadata?.avatar_url ?? null;
-  const { data: candidatesData } = await supabase.from("candidates").select();
+  const { data: candidatesData } = await supabase.from("candidatos").select();
   const candidates = (candidatesData ?? []) as any[];
   
   
@@ -270,11 +270,11 @@ export default async function DashboardPage() {
                 <CandidateCard
                   key={candidate.id}
                   id={candidate.id}
-                  name={candidate.name}
-                  subtitle={candidate.subtitle}
-                  party={candidate.party}
-                  profileLink={candidate.profileLink}
-                  avatarUrl={candidate.avatarUrl}
+                  nombre={candidate.nombre}
+                  cargo={candidate.cargo}
+                  partido={candidate.partido}
+                  avatar={candidate.avatar}
+                  ubicacion={candidate.ubicacion}
                 />
               ))}
             </div>
