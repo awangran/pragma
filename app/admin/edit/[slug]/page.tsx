@@ -457,318 +457,318 @@ export default function AdminEditPage() {
 				</p>
 			</header>
 
-			<form className="space-y-10" onSubmit={handleSubmit}>
-				{/* Candidate Information Section */}
-				<section className="space-y-5">
-					<div>
-						<h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-							<span className="w-1 h-6 bg-primary rounded"></span>
-							Información básica
-						</h2>
-					</div>
-					<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-						<div className="space-y-2">
-							<Label htmlFor="nombre" className="font-semibold">Nombre *</Label>
-							<Input
-								id="nombre"
-								name="nombre"
-								value={form.nombre}
-								onChange={handleChange}
-								placeholder="Nombre completo del candidato"
-								required
-							/>
-						</div>
+                <form className="space-y-10" onSubmit={handleSubmit}>
+                    {/* Candidate Information Section */}
+                    <section className="space-y-5">
+                        <div>
+                            <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                                <span className="w-1 h-6 bg-primary rounded"></span>
+                                Información básica
+                            </h2>
+                        </div>
+                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="nombre" className="font-semibold">Nombre *</Label>
+                                <Input
+                                    id="nombre"
+                                    name="nombre"
+                                    value={form.nombre}
+                                    onChange={handleChange}
+                                    placeholder="Nombre completo del candidato"
+                                    required
+                                />
+                            </div>
 
-						<div className="space-y-2">
-							<Label htmlFor="cargo" className="font-semibold">Cargo *</Label>
-							<Input
-								id="cargo"
-								name="cargo"
-								value={form.cargo}
-								onChange={handleChange}
-								placeholder="P. ej. Alcalde, Concejal"
-								required
-							/>
-						</div>
+                            <div className="space-y-2">
+                                <Label htmlFor="cargo" className="font-semibold">Cargo *</Label>
+                                <Input
+                                    id="cargo"
+                                    name="cargo"
+                                    value={form.cargo}
+                                    onChange={handleChange}
+                                    placeholder="P. ej. Alcalde, Concejal"
+                                    required
+                                />
+                            </div>
 
-						<div className="space-y-2">
-							<Label htmlFor="partido" className="font-semibold">Partido *</Label>
-							<Input
-								id="partido"
-								name="partido"
-								value={form.partido}
-								onChange={handleChange}
-								placeholder="Partido político"
-								required
-							/>
-						</div>
+                            <div className="space-y-2">
+                                <Label htmlFor="partido" className="font-semibold">Partido *</Label>
+                                <Input
+                                    id="partido"
+                                    name="partido"
+                                    value={form.partido}
+                                    onChange={handleChange}
+                                    placeholder="Partido político"
+                                    required
+                                />
+                            </div>
 
-						<div className="space-y-2 md:col-span-2">
-							<Label htmlFor="ubicacion" className="font-semibold">Departamento / Ubicación *</Label>
-							<select
-								id="ubicacion"
-								name="ubicacion"
-								required
-								value={form.ubicacion}
-								onChange={handleChange}
-								className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-							>
-								<option value="">Selecciona un departamento</option>
-                                <option value="Amazonas">Amazonas</option>
-                                <option value="Antioquia">Antioquia</option>
-                                <option value="Arauca">Arauca</option>
-                                <option value="Bolívar">Bolívar</option>
-                                <option value="Boyacá">Boyacá</option>
-                                <option value="Bogotá">Bogotá</option>
-                                <option value="Caldas">Caldas</option>
-                                <option value="Cauca">Cauca</option>
-                                <option value="Cesar">Cesar</option>
-                                <option value="Córdoba">Córdoba</option>
-                                <option value="Cundinamarca">Cundinamarca</option>
-                                <option value="Guaviare">Guaviare</option>
-                                <option value="Huila">Huila</option>
-                                <option value="La Guajira">La Guajira</option>
-                                <option value="Magdalena">Magdalena</option>
-                                <option value="Meta">Meta</option>
-                                <option value="Nariño">Nariño</option>
-                                <option value="Norte de Santander">Norte de Santander</option>
-                                <option value="Putumayo">Putumayo</option>
-                                <option value="Quindío">Quindío</option>
-                                <option value="Risaralda">Risaralda</option>
-                                <option value="Santander">Santander</option>
-                                <option value="Sucre">Sucre</option>
-                                <option value="Tolima">Tolima</option>
-                                <option value="Valle del Cauca">Valle del Cauca</option>
-                                <option value="Vaupés">Vaupés</option>
-                                <option value="Vichada">Vichada</option>
-							</select>
-						</div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="ubicacion" className="font-semibold">Departamento / Ubicación *</Label>
+                                <select
+                                    id="ubicacion"
+                                    name="ubicacion"
+                                    required
+                                    value={form.ubicacion}
+                                    onChange={handleChange}
+                                    className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                                >
+                                    <option value="">Selecciona un departamento</option>
+                                    <option value="Amazonas">Amazonas</option>
+                                    <option value="Antioquia">Antioquia</option>
+                                    <option value="Arauca">Arauca</option>
+                                    <option value="Bolívar">Bolívar</option>
+                                    <option value="Boyacá">Boyacá</option>
+                                    <option value="Bogotá">Bogotá</option>
+                                    <option value="Caldas">Caldas</option>
+                                    <option value="Cauca">Cauca</option>
+                                    <option value="Cesar">Cesar</option>
+                                    <option value="Córdoba">Córdoba</option>
+                                    <option value="Cundinamarca">Cundinamarca</option>
+                                    <option value="Guaviare">Guaviare</option>
+                                    <option value="Huila">Huila</option>
+                                    <option value="La Guajira">La Guajira</option>
+                                    <option value="Magdalena">Magdalena</option>
+                                    <option value="Meta">Meta</option>
+                                    <option value="Nariño">Nariño</option>
+                                    <option value="Norte de Santander">Norte de Santander</option>
+                                    <option value="Putumayo">Putumayo</option>
+                                    <option value="Quindío">Quindío</option>
+                                    <option value="Risaralda">Risaralda</option>
+                                    <option value="Santander">Santander</option>
+                                    <option value="Sucre">Sucre</option>
+                                    <option value="Tolima">Tolima</option>
+                                    <option value="Valle del Cauca">Valle del Cauca</option>
+                                    <option value="Vaupés">Vaupés</option>
+                                    <option value="Vichada">Vichada</option>
+                                </select>
+                            </div>
 
-						<div className="space-y-2 md:col-span-2">
-							<Label htmlFor="descripcion" className="font-semibold">Descripción Detallada *</Label>
-							<textarea
-								id="descripcion"
-								name="descripcion"
-								value={form.descripcion}
-								onChange={handleChange}
-								placeholder="Información sobre el candidato, su trayectoria, propuestas principales, logros relevantes..."
-								className="min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-								required
-							/>
-						</div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="descripcion" className="font-semibold">Descripción Detallada *</Label>
+                                <textarea
+                                    id="descripcion"
+                                    name="descripcion"
+                                    value={form.descripcion}
+                                    onChange={handleChange}
+                                    placeholder="Información sobre el candidato, su trayectoria, propuestas principales, logros relevantes..."
+                                    className="min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    required
+                                />
+                            </div>
 
-						<div className="space-y-2 md:col-span-2">
-							<Label htmlFor="links" className="font-semibold">Enlaces / Redes Sociales *</Label>
-							<Input
-								id="links"
-								name="links"
-								value={form.links}
-								onChange={handleChange}
-								placeholder="Separados por comas (ej: https://twitter.com/..., https://facebook.com/...)"
-								required
-							/>
-						</div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="links" className="font-semibold">Enlaces / Redes Sociales *</Label>
+                                <Input
+                                    id="links"
+                                    name="links"
+                                    value={form.links}
+                                    onChange={handleChange}
+                                    placeholder="Separados por comas (ej: https://twitter.com/..., https://facebook.com/...)"
+                                    required
+                                />
+                            </div>
 
-						<div className="space-y-2 md:col-span-2">
-							<Label htmlFor="tipo" className="font-semibold">Tipo de Candidato *</Label>
-							<Input
-								id="tipo"
-								name="tipo"
-								value={form.tipo}
-								onChange={handleChange}
-								placeholder="Ej: Alcalde, Concejal, Gobernador"
-								required
-							/>
-						</div>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="tipo" className="font-semibold">Tipo de Candidato *</Label>
+                                <Input
+                                    id="tipo"
+                                    name="tipo"
+                                    value={form.tipo}
+                                    onChange={handleChange}
+                                    placeholder="Ej: Alcalde, Concejal, Gobernador"
+                                    required
+                                />
+                            </div>
 
-						{/* Avatar Section */}
-						<div className="space-y-3 md:col-span-2 rounded-lg border border-dashed border-primary/20 bg-primary/5 p-4">
-							<Label htmlFor="avatar" className="font-semibold text-base">Foto del Candidato</Label>
-							<p className="text-xs text-muted-foreground">Máximo 5MB. Formatos: JPG, PNG, WEBP</p>
-							<Input
-								id="avatar"
-								name="avatar"
-								type="file"
-								accept="image/*"
-								onChange={handleAvatarUpload}
-								ref={avatarInputRef}
-								disabled={isUploading}
-								className="cursor-pointer"
-							/>
-							{form.avatar && (
-								<p className="text-xs text-emerald-600">Foto actual cargada</p>
-							)}
-						</div>
-					</div>
-				</section>
+                            {/* Avatar Section */}
+                            <div className="space-y-3 md:col-span-2 rounded-lg border border-dashed border-primary/20 bg-primary/5 p-4">
+                                <Label htmlFor="avatar" className="font-semibold text-base">Foto del Candidato</Label>
+                                <p className="text-xs text-muted-foreground">Máximo 5MB. Formatos: JPG, PNG, WEBP</p>
+                                <Input
+                                    id="avatar"
+                                    name="avatar"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarUpload}
+                                    ref={avatarInputRef}
+                                    disabled={isUploading}
+                                    className="cursor-pointer"
+                                />
+                                {form.avatar && (
+                                    <p className="text-xs text-emerald-600">Foto actual cargada</p>
+                                )}
+                            </div>
+                        </div>
+                    </section>
 
-				{/* Propuestas Section */}
-				<section className="space-y-5">
-					<div>
-						<h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-							<span className="w-1 h-6 bg-primary rounded"></span>
-							Propuestas
-						</h2>
-					</div>
-					<div className="space-y-3">
-						<div className="flex items-center justify-between">
-							<div>
-								<Label className="text-base font-semibold">Propuestas políticas</Label>
-								<p className="text-sm text-muted-foreground">Agregue propuestas políticas o plataformas</p>
-							</div>
-							<Button
-								type="button"
-								variant="outline"
-								onClick={handleAddPropuesta}
-								className="gap-1"
-							>
-								+ Agregar
-							</Button>
-						</div>
+                    {/* Propuestas Section */}
+                    <section className="space-y-5">
+                        <div>
+                            <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                                <span className="w-1 h-6 bg-primary rounded"></span>
+                                Propuestas
+                            </h2>
+                        </div>
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <Label className="text-base font-semibold">Propuestas políticas</Label>
+                                    <p className="text-sm text-muted-foreground">Agregue propuestas políticas o plataformas</p>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleAddPropuesta}
+                                    className="gap-1"
+                                >
+                                    + Agregar
+                                </Button>
+                            </div>
 
-						<div className="space-y-4">
-							{propuestas.map((propuesta, index) => (
-								<details
-									key={`propuesta-${index}`}
-									className="rounded-lg border border-input bg-card p-4"
-									open={index === 0}
-								>
-									<summary className="cursor-pointer list-none">
-										<div className="flex items-center justify-between">
-											<h4 className="font-medium">
-												Propuesta {index + 1}
-											</h4>
-											<span className="text-xs text-muted-foreground">Click para expandir/colapsar</span>
-										</div>
-									</summary>
+                            <div className="space-y-4">
+                                {propuestas.map((propuesta, index) => (
+                                    <details
+                                        key={`propuesta-${index}`}
+                                        className="rounded-lg border border-input bg-card p-4"
+                                        open={index === 0}
+                                    >
+                                        <summary className="cursor-pointer list-none">
+                                            <div className="flex items-center justify-between">
+                                                <h4 className="font-medium">
+                                                    Propuesta {index + 1}
+                                                </h4>
+                                                <span className="text-xs text-muted-foreground">Click para expandir/colapsar</span>
+                                            </div>
+                                        </summary>
 
-									<div className="mt-4 space-y-3">
-										<div className="flex items-center justify-between">
-											<p className="text-sm text-muted-foreground">Detalles de la propuesta</p>
-											{propuestas.length > 0 && (
-												<Button
-													type="button"
-													variant="ghost"
-													size="sm"
-													onClick={() => handleRemovePropuesta(index)}
-													className="text-red-600 hover:text-red-700 hover:bg-red-50"
-												>
-													✕ Eliminar
-												</Button>
-											)}
-										</div>
+                                        <div className="mt-4 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-sm text-muted-foreground">Detalles de la propuesta</p>
+                                                {propuestas.length > 0 && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleRemovePropuesta(index)}
+                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    >
+                                                        ✕ Eliminar
+                                                    </Button>
+                                                )}
+                                            </div>
 
-										<div className="space-y-2">
-											<Label htmlFor={`propuesta-tema-${index}`} className="font-medium">
-												Tema *
-											</Label>
-											<select
-												id={`propuesta-tema-${index}`}
-												value={propuesta.tema_id}
-												onChange={(e) =>
-													handlePropuestaChange(index, "tema_id", e.target.value)
-												}
-												className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-												required={index === 0}
-											>
-												<option value="">Selecciona un tema</option>
-												{temas.map((tema) => (
-													<option key={tema.id} value={tema.id}>
-														{tema.titulo}
-													</option>
-												))}
-											</select>
-										</div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor={`propuesta-tema-${index}`} className="font-medium">
+                                                    Tema *
+                                                </Label>
+                                                <select
+                                                    id={`propuesta-tema-${index}`}
+                                                    value={propuesta.tema_id}
+                                                    onChange={(e) =>
+                                                        handlePropuestaChange(index, "tema_id", e.target.value)
+                                                    }
+                                                    className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                                                    required={index === 0}
+                                                >
+                                                    <option value="">Selecciona un tema</option>
+                                                    {temas.map((tema) => (
+                                                        <option key={tema.id} value={tema.id}>
+                                                            {tema.titulo}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
 
-										<div className="space-y-2">
-											<Label htmlFor={`propuesta-titulo-${index}`} className="font-medium">
-												Título de la propuesta *
-											</Label>
-											<Input
-												id={`propuesta-titulo-${index}`}
-												value={propuesta.titulo}
-												onChange={(e) =>
-													handlePropuestaChange(index, "titulo", e.target.value)
-												}
-												placeholder="Título breve de la propuesta"
-												required={index === 0}
-											/>
-										</div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor={`propuesta-titulo-${index}`} className="font-medium">
+                                                    Título de la propuesta *
+                                                </Label>
+                                                <Input
+                                                    id={`propuesta-titulo-${index}`}
+                                                    value={propuesta.titulo}
+                                                    onChange={(e) =>
+                                                        handlePropuestaChange(index, "titulo", e.target.value)
+                                                    }
+                                                    placeholder="Título breve de la propuesta"
+                                                    required={index === 0}
+                                                />
+                                            </div>
 
-										<div className="space-y-2">
-											<Label htmlFor={`propuesta-que_pasa-${index}`} className="font-medium">
-												¿Qué pasa? *
-											</Label>
-											<textarea
-												id={`propuesta-que_pasa-${index}`}
-												value={propuesta.que_pasa}
-												onChange={(e) =>
-													handlePropuestaChange(index, "que_pasa", e.target.value)
-												}
-												placeholder="Describe el problema o situación actual..."
-												className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-												required={index === 0}
-											/>
-										</div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor={`propuesta-que_pasa-${index}`} className="font-medium">
+                                                    ¿Qué pasa? *
+                                                </Label>
+                                                <textarea
+                                                    id={`propuesta-que_pasa-${index}`}
+                                                    value={propuesta.que_pasa}
+                                                    onChange={(e) =>
+                                                        handlePropuestaChange(index, "que_pasa", e.target.value)
+                                                    }
+                                                    placeholder="Describe el problema o situación actual..."
+                                                    className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                                    required={index === 0}
+                                                />
+                                            </div>
 
-										<div className="space-y-2">
-											<Label htmlFor={`propuesta-que_propone-${index}`} className="font-medium">
-												¿Qué propone? *
-											</Label>
-											<textarea
-												id={`propuesta-que_propone-${index}`}
-												value={propuesta.que_propone}
-												onChange={(e) =>
-													handlePropuestaChange(index, "que_propone", e.target.value)
-												}
-												placeholder="Detalla tu propuesta o solución..."
-												className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-												required={index === 0}
-											/>
-										</div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor={`propuesta-que_propone-${index}`} className="font-medium">
+                                                    ¿Qué propone? *
+                                                </Label>
+                                                <textarea
+                                                    id={`propuesta-que_propone-${index}`}
+                                                    value={propuesta.que_propone}
+                                                    onChange={(e) =>
+                                                        handlePropuestaChange(index, "que_propone", e.target.value)
+                                                    }
+                                                    placeholder="Detalla tu propuesta o solución..."
+                                                    className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                                    required={index === 0}
+                                                />
+                                            </div>
 
-										<div className="space-y-2">
-											<Label htmlFor={`propuesta-que_cambia-${index}`} className="font-medium">
-												¿Qué cambia? *
-											</Label>
-											<textarea
-												id={`propuesta-que_cambia-${index}`}
-												value={propuesta.que_cambia}
-												onChange={(e) =>
-													handlePropuestaChange(index, "que_cambia", e.target.value)
-												}
-												placeholder="Describe el resultado o cambio esperado..."
-												className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-												required={index === 0}
-											/>
-										</div>
-									</div>
-								</details>
-							))}
-						</div>
-					</div>
-				</section>
+                                            <div className="space-y-2">
+                                                <Label htmlFor={`propuesta-que_cambia-${index}`} className="font-medium">
+                                                    ¿Qué cambia? *
+                                                </Label>
+                                                <textarea
+                                                    id={`propuesta-que_cambia-${index}`}
+                                                    value={propuesta.que_cambia}
+                                                    onChange={(e) =>
+                                                        handlePropuestaChange(index, "que_cambia", e.target.value)
+                                                    }
+                                                    placeholder="Describe el resultado o cambio esperado..."
+                                                    className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                                    required={index === 0}
+                                                />
+                                            </div>
+                                        </div>
+                                    </details>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
 
-				{status.type === "error" && (
-					<p className="text-sm text-destructive">{status.message}</p>
-				)}
-				{status.type === "success" && (
-					<p className="text-sm text-emerald-600">{status.message}</p>
-				)}
+                    {status.type === "error" && (
+                        <p className="text-sm text-destructive">{status.message}</p>
+                    )}
+                    {status.type === "success" && (
+                        <p className="text-sm text-emerald-600">{status.message}</p>
+                    )}
 
-				<div className="flex gap-3">
-					<Button type="submit" disabled={isSubmitting || isUploading}>
-						{isSubmitting ? "Guardando..." : "Guardar cambios"}
-					</Button>
-					<Button
-						type="button"
-						variant="outline"
-						onClick={() => router.push(`/candidatos/${candidateId}`)}
-					>
-						Cancelar
-					</Button>
-				</div>
-			</form>
-		</main>
+                    <div className="flex gap-3">
+                        <Button type="submit" disabled={isSubmitting || isUploading}>
+                            {isSubmitting ? "Guardando..." : "Guardar cambios"}
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.push(`/candidatos/${candidateId}`)}
+                        >
+                            Cancelar
+                        </Button>
+                    </div>
+                </form>
+            </main>
 	);
 }
