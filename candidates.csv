@@ -5,8 +5,7 @@ Promueve economía liberal, seguridad integral, modernización digital del Estad
 “desorden fiscal” del petrismo. Enfocado en la unidad ciudadana contra la polarización. Tiene 48
 años.","[""● Edil de Chapinero (1998–2000)."", ""● Concejal de Bogotá (2001–2003)."", ""● Concejal de Bogotá (2004–2005), reconocido como uno de los mejores cabildantes por su\nalta actividad legislativa, reformas tributarias y propuestas culturales y sociales."", ""● Representante a la Cámara por Bogotá por el partido Por el País que Soñamos\n(2006–2010), con la votación más alta del país en ese período."", ""● Candidato a la Alcaldía Mayor de Bogotá (2011), con una campaña muy activa a nivel de\nlocalidades, aunque no ganó."", ""● Viceministro de Relaciones Laborales (2011) en el Gobierno de Juan Manuel Santos."", ""● Alto Consejero Presidencial para las Regiones y la Participación Ciudadana (2013)."", ""● Ministro de Tecnologías de la Información y Comunicaciones (TIC) (2015–2018),\ntambién en el gobierno de Santos."", ""● Senador de la República por Cambio Radical (2022–2025), donde se consolidó como una\nde las principales figuras de la oposición.""]","{""Economía y Crisis Fiscal"": ""El enfoque fiscal de David Luna se basa en ordenar el Estado antes de cobrar más: reducir la evasión, controlar el gasto, cumplir las reglas fiscales y usar tecnología para que cada peso público sea visible y evaluable.”, ""Empleo"": ""La propuesta de empleo de David Luna prioriza la formalización, la productividad y la conexión real entre educación y trabajo. El empleo formal deja de ser una consecuencia indirecta del crecimiento y se convierte en una meta verificable de la política económica.”, ""Seguridad"": ""El enfoque de seguridad de David Luna prioriza el control efectivo del territorio, el combate a economías criminales, la reducción de la impunidad y la protección directa de la ciudadanía. La seguridad se mide por resultados reales: menos delitos, menos control criminal y mayor presencia del Estado.”, ""Salud"": ""La propuesta de salud de David Luna busca que el sistema funcione para el paciente, no para los trámites. El eje es atención oportuna, control real, estabilidad financiera y uso de tecnología para que los recursos se traduzcan en servicios efectivos.”, ""Paz"": ""La propuesta de paz de David Luna plantea que no puede haber paz sin Estado, sin justicia ni sin verdad para las víctimas. Los procesos de paz deben tener reglas claras, plazos, verificación y consecuencias, y estar articulados con seguridad y desarrollo territorial."", ""Educación"": ""La propuesta educativa de David Luna busca pasar de un sistema que administra matrícula a uno que garantiza aprendizaje, reduce brechas territoriales, dignifica a los docentes y conecta la educación con empleo, ciencia y futuro.”, ""Ciencia y Tecnología"": ""La propuesta de ciencia y tecnología de David Luna concibe la tecnología como motor de empleo, igualdad y productividad, y como base para un Estado interoperable, transparente y basado en datos.”, ""Medio Ambiente"": ""La propuesta ambiental de David Luna parte de una idea central: no hay protección ambiental sin Estado, ni sostenibilidad sin oportunidades económicas legales. El enfoque combina control territorial, justicia, desarrollo sostenible y participación ciudadana con datos abiertos.”, ""Equidad Social"": ""La propuesta de equidad social de David Luna busca romper la pobreza estructural, no administrarla. El eje es usar datos, coordinar políticas y medir resultados para que la ayuda social se traduzca en oportunidades reales y sostenibles."", ""Infraestructura y Movilidad"": ""La propuesta de infraestructura y movilidad de David Luna busca conectar el país para reducir desigualdades, bajar costos de vida y mejorar la competitividad, con transparencia, planeación a largo plazo y evaluación por resultados."", ""Energía"": ""La propuesta energética de David Luna no plantea apagar el sistema actual, sino ordenarlo y fortalecerlo. Usa los recursos de hoy para financiar la energía limpia del mañana, garantiza seguridad energética, tarifas pagables y una transición responsable y verificable."",""Política Exterior"": ""La política exterior de David Luna propone una diplomacia de Estado, no de gobierno: técnica, predecible y orientada a resultados. Busca que la relación de Colombia con el mundo se traduzca en seguridad, empleo, inversión y protección efectiva para los ciudadanos.""
 }
-",
-"{{
+","{{
   ""Ciencia y Tecnología : La tecnología como motor de empleo, igualdad, productividad y Estado transparente"": [
     {
       ""id"": ""DL_CIENCIA_Y_TECNOLOGÍA__LA_TECNOLOGÍA_COMO_1"",
@@ -1004,21 +1003,3 @@ años.","[""● Edil de Chapinero (1998–2000)."", ""● Concejal de Bogotá (2
   ]
 }
 ",,FALSE
-
-
-
-{
-  {"tema": "Ciencias y tecnología: el taltaltal"
-    "tema_general": "Ciencias y tecnología"
-    "propuestas": [
-      {
-        "id": 1
-        "titulo": "Inversión sostenida en ciencia, tecnología e innovación"
-        "que_pasa_hoy": "La inversión en ciencia y tecnología es insuficiente y volátil, afectando el desarrollo de proyectos a largo plazo."
-        "que_propone": "Establecer un fondo permanente para financiar investigación científica y tecnológica, con aportes del sector público y privado."
-        "que_cambia": "Colombia cuenta con recursos estables para impulsar la innovación y el desarrollo científico."
-      }
-    
-    ]
-  }
-}

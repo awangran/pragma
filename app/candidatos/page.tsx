@@ -37,8 +37,12 @@ const filterLinks = [
 
 export default async function CandidatesPage() {
   const supabase = await createClient();
-  const { data } = await supabase.from("candidates").select();
-  const candidates = (data ?? []) as any[];
+  const { data: candidatesData } = await supabase.from("candidatos").select();
+  const candidates = (candidatesData ?? []) as any[];
+  const { data: temasData } = await supabase.from("temas").select();
+  const temas = (temasData ?? []) as any[];
+
+
 
   /* const activeCandidates = candidates.filter((c) => c?.retirado !== true);
   const retiredCandidates = candidates.filter((c) => c?.retirado === true); */
@@ -96,7 +100,7 @@ export default async function CandidatesPage() {
               </div>
             }
           >
-            <CandidatesFilterClient candidates={candidates as any} />
+            <CandidatesFilterClient candidates={candidates as any} temas={temas as any}/>
           </Suspense>
 
         </div>
