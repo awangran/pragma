@@ -99,12 +99,14 @@ export default async function DashboardPage() {
       <main className="px-0">
         {/* Hero Section (solid background) */}
         <section className="relative overflow-hidden bg-pdarkblue text-white bg-cover bg-center bg-no-repeat"
-                  style={{ backgroundImage: "url('/soft-gradient.svg')" }}>
-          <div className="container mx-auto px-6 py-16 md:py-24">
+                  style={{ backgroundImage: "url('/landing-banner.png')"}}>
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="container mx-auto px-6 py-16 md:py-24 relative z-10">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-pdarkblue">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-purple-100">
                 Tu radar ciudadano para
-                <span className="block mt-2 text-pdarkblue">decisiones informadas</span>
+                <span className="block mt-2 text-purple-100">decisiones informadas</span>
               </h1>
               <p className="text-lg md:text-xl text-pgray mb-8 max-w-2xl mx-auto">
                 Consulta propuestas, compara candidatos y haz seguimiento al cumplimiento de promesas electorales con evidencia clara y verificable.
