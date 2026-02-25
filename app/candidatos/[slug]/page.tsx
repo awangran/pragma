@@ -31,6 +31,21 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
     .select("id, titulo, tema_id, que_pasa, que_propone, que_cambia, tema:tema_id (titulo, tituloExtendido)")
     .eq("candidato_id", candidateId);
 
+  // Fetch tips for each tema
+  const { data: tipsRaw } = await supabase
+    .from("tips")
+    .select("tema_id, tema, descripcion");
+
+  const tipsMap = (tipsRaw ?? []).reduce(
+    (acc, tip) => {
+      if (tip.tema_id) {
+        acc[String(tip.tema_id)] = tip.descripcion;
+      }
+      return acc;
+    },
+    {} as Record<string, string | null>
+  );
+
   const propuestasArray = (propuestasRaw ?? []) as Array<{
     id: string;
     titulo: string;
@@ -196,6 +211,7 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
                   <PropuestasClient
                     propuestasPorTema={propuestasPorTema}
                     propuestasArray={propuestasArray}
+                    tipsMap={tipsMap}
                   />
                 </section>
               </div>

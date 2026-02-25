@@ -6,7 +6,15 @@ import {
   Lightbulb,
   RefreshCw,
   ChevronDown,
+  Ear,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface Propuesta {
   id: string;
@@ -29,14 +37,16 @@ interface PropuestasPorTema {
 interface PropuestasClientProps {
   propuestasPorTema: PropuestasPorTema;
   propuestasArray: Propuesta[];
+  tipsMap?: Record<string, string | null>;
 }
 
 export function PropuestasClient({
   propuestasPorTema,
   propuestasArray,
+  tipsMap = {},
 }: PropuestasClientProps) {
   const [expandedTemas, setExpandedTemas] = useState<Set<string>>(
-    new Set(Object.keys(propuestasPorTema))
+    new Set()
   );
 
   const toggleTema = (tema: string) => {
@@ -54,6 +64,10 @@ export function PropuestasClient({
       {Object.entries(propuestasPorTema).map(([temaTitulo, data]) => {
         const temaId = data.temaId;
         const isExpanded = expandedTemas.has(temaTitulo);
+        // Get tema_id from first item to look up tip
+        const firstItem = data.items[0];
+        const tipTemaId = firstItem?.tema_id ? String(firstItem.tema_id) : null;
+        const tipDescription = tipTemaId ? tipsMap[tipTemaId] : null;
 
         return (
           <div
@@ -61,28 +75,55 @@ export function PropuestasClient({
             id={temaId}
             className="rounded-lg border border-slate-200 scroll-mt-24"
           >
-            <button
-              onClick={() => toggleTema(temaTitulo)}
-              className="w-full flex items-center justify-between gap-3 p-3 sm:p-4 hover:bg-slate-50 transition-colors"
-            >
-              <div className="flex-1 text-left">
-                <h3 className="text-sm sm:text-base font-semibold text-slate-900 break-words">
-                  {temaTitulo}
-                  {data.tituloExtendido ? ` · ${data.tituloExtendido}` : ""}
-                </h3>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-[11px]">
-                  {data.items.length}
-                </span>
-                <ChevronDown
-                  className={`h-4 w-4 text-slate-500 transition-transform ${
-                    isExpanded ? "rotate-180" : ""
-                  }`}
-                  aria-hidden
-                />
-              </div>
-            </button>
+            <div className="flex items-center">
+              <button
+                onClick={() => toggleTema(temaTitulo)}
+                className="flex-1 flex items-center justify-between gap-3 p-3 sm:p-4 hover:bg-slate-50 transition-colors"
+              >
+                <div className="flex-1 text-left">
+                  <h3 className="text-sm sm:text-base font-semibold text-slate-900 break-words">
+                    {temaTitulo}
+                    {data.tituloExtendido ? ` · ${data.tituloExtendido}` : ""}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-[11px]">
+                    {data.items.length}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 text-slate-500 transition-transform ${
+                      isExpanded ? "rotate-180" : ""
+                    }`}
+                    aria-hidden
+                  />
+                </div>
+              </button>
+
+              {tipDescription && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button
+                      type="button"
+                      className="p-2 sm:p-3 hover:bg-amber-50 transition-colors border-l border-slate-200"
+                      aria-label="Ver consejo sobre este tema"
+                    >
+                      <Ear className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" aria-hidden />
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2 text-amber-700">
+                        <Ear className="h-5 w-5" aria-hidden />
+                        No te dejes endulzar el oído
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="mt-2 text-sm text-slate-700 leading-relaxed">
+                      {tipDescription}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
 
             {isExpanded && (
               <div className="border-t border-slate-200 px-3 sm:px-4 py-3 sm:py-4 bg-white rounded-b-lg flex flex-col gap-3">
