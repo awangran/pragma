@@ -25,6 +25,17 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     .eq("id", articleId)
     .single();
 
+  // Check if user is admin
+  let isAdmin = false;
+  if (user?.id) {
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    isAdmin = profileData?.role === "admin";
+  }
+
   if (!article) {
     return (
       <div className="w-full flex flex-col min-h-screen">
@@ -134,6 +145,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   <Calendar className="h-4 w-4" aria-hidden />
                   <time dateTime={article.created_at}>{formattedDate}</time>
                 </div>
+              )}
+
+              {/* Edit button for admins */}
+              {isAdmin && (
+                <Link
+                  href={`/admin/edit-articulo/${articleId}`}
+                  className="mt-4 inline-flex w-max items-center justify-center rounded-lg border border-blue-300 bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+                >
+                  ✎ Editar artículo
+                </Link>
               )}
             </header>
 
