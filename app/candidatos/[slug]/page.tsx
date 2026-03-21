@@ -175,7 +175,7 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
 
                 {isAdmin && (
                   <Link
-                    href={`/admin/edit/${candidateId}`}
+                    href={`/admin/edit-candidato/${candidateId}`}
                     className="inline-flex w-max items-center justify-center rounded-lg border border-blue-300 bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
                   >
                     ✎ Editar candidato
