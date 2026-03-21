@@ -3,12 +3,46 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "./ui/button";
-import { User, Menu, X } from "lucide-react";
+import { User, Menu, X, Plus } from "lucide-react";
 import { LogoutButton } from "./logout-button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isCheckingRole, setIsCheckingRole] = useState(true);
+
+  useEffect(() => {
+    const checkRole = async () => {
+      const supabase = createClient();
+      const { data: authData, error: authError } =
+        await supabase.auth.getUser();
+
+      if (authError || !authData?.user) {
+        setIsAdmin(false);
+        setIsCheckingRole(false);
+        return;
+      }
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", authData.user.id)
+        .single();
+
+      if (profileError) {
+        setIsAdmin(false);
+        setIsCheckingRole(false);
+        return;
+      }
+
+      setIsAdmin(profileData?.role === "admin");
+      setIsCheckingRole(false);
+    };
+
+    void checkRole();
+  }, []);
 
   const navLinks = [
     { href: "/dashboard", label: "Inicio" },
@@ -37,6 +71,17 @@ export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
               {link.label}
             </Link>
           ))}
+          {!isCheckingRole && isAdmin && (
+            <Button
+              variant="outline"
+              className="border-2 border-primary text-primary font-medium rounded-full p-2 hover:bg-primary/10"
+              asChild
+            >
+              <Link href="/admin/add-candidato" title="Agregar contenido">
+                <Plus className="h-5 w-5" />
+              </Link>
+            </Button>
+          )}
         </div>
 
         {/* Desktop Auth */}
@@ -101,6 +146,19 @@ export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
                 {link.label}
               </Link>
             ))}
+
+            {!isCheckingRole && isAdmin && (
+              <Button
+                variant="outline"
+                className="w-full border-2 border-primary text-primary font-medium rounded-full flex items-center justify-center gap-2"
+                asChild
+              >
+                <Link href="/admin/add-candidato" onClick={() => setIsOpen(false)}>
+                  <Plus className="h-5 w-5" />
+                  Agregar contenido
+                </Link>
+              </Button>
+            )}
 
             {/* Mobile Auth */}
             <div className="border-t pt-3 mt-3">
