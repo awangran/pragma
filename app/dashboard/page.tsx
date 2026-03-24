@@ -5,47 +5,17 @@ import Link from "next/link";
 import CandidateCard from "../../components/candidate-card";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import ArticleCard from "@/components/article-card";
 import {
   Search,
   Users,
   BarChart3,
   Calendar,
   TrendingUp,
-  ArrowRight,
   CheckCircle,
 } from "lucide-react";
-
-// Placeholder data for news
-const news = [
-  {
-    id: 1,
-    title: "Candidato a la presidencia anuncia por la red X que ....",
-    date: "2 de Enero 2026",
-    href: "/articulos/1",
-    featured: true,
-  },
-  {
-    id: 2,
-    title: "5 cosas que debes saber antes de votar",
-    date: "2 de Enero 2026",
-    href: "/articulos/2",
-  },
-  {
-    id: 3,
-    title: "Fechas de elecciones a la camara",
-    date: "24 de Enero 2026",
-    href: "/articulos/3",
-  },
-  {
-    id: 4,
-    title: "Identifica las diferencias entre partidos",
-    date: "2 de Febrero 2026",
-    href: "/articulos/4",
-  },
-];
+import SearchBar from "@/components/search-bar";
 
 // Quick access items
 const quickAccess = [
@@ -88,6 +58,13 @@ export default async function DashboardPage() {
   const avatarUrl = user?.user_metadata?.avatar_url ?? null;
   const { data: candidatesData } = await supabase.from("candidatos").select();
   const candidates = (candidatesData ?? []) as any[];
+
+  const { data: latestArticlesData } = await supabase
+    .from("articulos")
+    .select("id, titulo, resumen, categoria, foto")
+    .order("created_at", { ascending: false })
+    .limit(3);
+  const latestArticles = (latestArticlesData ?? []) as any[];
   
   
   
@@ -113,21 +90,7 @@ export default async function DashboardPage() {
               </p>
 
               {/* Search Bar */}
-              <div className="max-w-2xl mx-auto">
-                <div className="relative flex gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/70" />
-                    <Input
-                      type="search"
-                      placeholder="Busca candidatos, propuestas o temas..."
-                      className="pl-12 h-14 text-base bg-white text-pblack border-0 shadow-xl focus-visible:ring-2 focus-visible:ring-white/50"
-                    />
-                  </div>
-                  <Button size="lg" className="h-14 px-8 bg-white text-pdarkblue hover:bg-pskyblue/40 shadow-xl">
-                    Buscar
-                  </Button>
-                </div>
-              </div>
+              <SearchBar />
             </div>
           </div>
         </section>
@@ -171,30 +134,22 @@ export default async function DashboardPage() {
               </div>
               <Button variant="outline" className="hidden md:flex">
                 <Link href="/articulos">
-                Ver todas 
+                Ver todas
                 </Link>
               </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Suspense fallback={<div>Loading users...</div>}> 
-              {news.map((n) => (
-                <Card key={n.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="secondary" className="text-xs">Actualidad</Badge>
-                      <span className="text-xs text-slate-500">{n.date}</span>
-                    </div>
-                    <CardTitle className="text-lg leading-tight">{n.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Link href={n.href} className="inline-flex items-center text-pblue text-sm">
-                      Leer más <ArrowRight className="ml-1 h-3 w-3" />
-                    </Link>
-                  </CardContent>
-                </Card>
+              {latestArticles.map((a) => (
+                <ArticleCard
+                  key={a.id}
+                  id={a.id}
+                  titulo={a.titulo}
+                  resumen={a.resumen}
+                  categoria={a.categoria}
+                  foto={a.foto}
+                />
               ))}
-              </Suspense>
             </div>
           </div>
         </section>
