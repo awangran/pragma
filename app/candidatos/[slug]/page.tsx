@@ -6,6 +6,9 @@ import { MapPin } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import Footer from "@/components/footer";
 import { PropuestasClient } from "@/components/propuestas-client";
+import { DeleteCandidateButton } from "@/components/delete-candidate-button";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 interface CandidateProfilePageProps {
   params: Promise<{ slug: string }>;
@@ -29,6 +32,11 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
   const { data: propuestasRaw } = await supabase
     .from("propuestas")
     .select("id, titulo, tema_id, que_pasa, que_propone, que_cambia, tema:tema_id (titulo, tituloExtendido)")
+    .eq("candidato_id", candidateId);
+
+  const { data: experienciaRaw } = await supabase
+    .from("experiencia")
+    .select("historial")
     .eq("candidato_id", candidateId);
 
   // Fetch tips for each tema
@@ -55,6 +63,18 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
     que_cambia: string | null;
     tema?: { titulo?: string | null; tituloExtendido?: string | null } | null;
   }>;
+
+  const experienciaArray: string[] = ((experienciaRaw ?? []) as Array<{ historial: string | null }>)
+    .map((item: { historial: string | null }) => {
+      const raw = item.historial ?? "";
+      return raw
+        .replace(/\\r\\n/g, "\n")
+        .replace(/\\n/g, "\n")
+        .replace(/\\r/g, "\n")
+        .replace(/\r\n?/g, "\n")
+        .trim();
+    })
+    .filter(Boolean);
 
   const slugifyTema = (value: string) =>
     value
@@ -93,6 +113,36 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
 
   if (!candidate || !candidateId) {
     return <div className="p-8 text-center">Candidato no encontrado.</div>;
+  }
+
+  async function deleteCandidateAction(_formData: FormData) {
+    "use server";
+
+    const supabase = await createClient();
+    const { data: authData } = await supabase.auth.getUser();
+    const authUser = authData?.user ?? null;
+
+    if (!authUser?.id) {
+      return;
+    }
+
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", authUser.id)
+      .single();
+
+    if (profileData?.role !== "admin") {
+      return;
+    }
+
+    await supabase.from("experiencia").delete().eq("candidato_id", candidateId);
+    await supabase.from("propuestas").delete().eq("candidato_id", candidateId);
+    await supabase.from("candidatos").delete().eq("id", candidateId);
+
+    revalidatePath("/candidatos");
+    revalidatePath(`/candidatos/${candidateId}`);
+    redirect("/candidatos");
   }
 
 
@@ -174,12 +224,21 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
                 </div>
 
                 {isAdmin && (
-                  <Link
-                    href={`/admin/edit-candidato/${candidateId}`}
-                    className="inline-flex w-max items-center justify-center rounded-lg border border-blue-300 bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
-                  >
-                    ✎ Editar candidato
-                  </Link>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      href={`/admin/edit-candidato/${candidateId}`}
+                      className="inline-flex w-max items-center justify-center rounded-lg border border-blue-300 bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+                    >
+                      ✎ Editar candidato
+                    </Link>
+                    <DeleteCandidateButton
+                      action={deleteCandidateAction}
+                      confirmMessage="¿Seguro que quieres eliminar este candidato? Esta acción no se puede deshacer."
+                      className="inline-flex w-max items-center justify-center rounded-lg border border-red-300 bg-red-50 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-red-700 hover:bg-red-100 transition-colors"
+                    >
+                      Eliminar candidato
+                    </DeleteCandidateButton>
+                  </div>
                 )}
               </div>
             </div>
@@ -195,6 +254,22 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
                   <p className="text-xs sm:text-sm text-slate-700">
                     {candidate.descripcion || "No hay biografía disponible."}
                   </p>
+                </section>
+
+                {/* Experiencia */}
+                <section className="mb-4 sm:mb-6 rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
+                  <h2 className="mb-2 text-sm sm:text-base font-semibold text-slate-900">Experiencia</h2>
+                  {experienciaArray.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-slate-700">
+                      {experienciaArray.map((historial: string, index: number) => (
+                        <li key={`${historial}-${index}`} className="whitespace-pre-line">
+                          {historial}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs sm:text-sm text-slate-700">No hay experiencia registrada.</p>
+                  )}
                 </section>
 
                 {/* Propuestas */}
