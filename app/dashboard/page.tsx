@@ -69,7 +69,7 @@ export default async function DashboardPage() {
   
   
   return (
-    <div className="flex-1 w-full flex flex-col">
+    <div className="flex-1 w-full flex flex-col" suppressHydrationWarning>
       <Suspense fallback={<Navbar user={null} />}>
         <Navbar user={user ? { avatarUrl } : null} />
       </Suspense>
