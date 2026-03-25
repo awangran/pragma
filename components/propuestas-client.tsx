@@ -83,7 +83,7 @@ export function PropuestasClient({
                 <div className="flex-1 text-left">
                   <h3 className="text-sm sm:text-base font-semibold text-slate-900 break-words">
                     {temaTitulo}
-                    {data.tituloExtendido ? ` · ${data.tituloExtendido}` : ""}
+                    
                   </h3>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
