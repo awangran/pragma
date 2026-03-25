@@ -32,6 +32,11 @@ type PropuestaState = {
 	que_cambia: string;
 };
 
+type ExperienciaState = {
+	id?: string;
+	historial: string;
+};
+
 const initialState: FormState = {
 	nombre: "",
 	cargo: "",
@@ -52,6 +57,7 @@ export default function AdminEditPage() {
 	const [form, setForm] = useState<FormState>(initialState);
 	const [temas, setTemas] = useState<Tema[]>([]);
 	const [propuestas, setPropuestas] = useState<PropuestaState[]>([]);
+	const [experiencias, setExperiencias] = useState<ExperienciaState[]>([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 	const [isCheckingRole, setIsCheckingRole] = useState(true);
@@ -142,6 +148,16 @@ export default function AdminEditPage() {
 				setPropuestas(propuestasData as PropuestaState[]);
 			}
 
+			// Fetch experiencias
+			const { data: experienciasData, error: experienciasError } = await supabase
+				.from("experiencia")
+				.select()
+				.eq("candidato_id", candidateId);
+
+			if (!experienciasError && experienciasData) {
+				setExperiencias(experienciasData as ExperienciaState[]);
+			}
+
 			// Fetch temas
 			const { data: temasData, error: temasError } = await supabase
 				.from("tema")
@@ -220,6 +236,44 @@ export default function AdminEditPage() {
 			return;
 		}
 
+		// Handle experiencias updates and inserts
+		const experienciasLimpias = experiencias
+			.map((exp) => ({ ...exp, historial: exp.historial.trim() }))
+			.filter((exp) => exp.historial);
+
+		const newExperiencias = experienciasLimpias.filter((e) => !e.id);
+		const existingExperiencias = experienciasLimpias.filter((e) => e.id);
+
+		if (newExperiencias.length > 0) {
+			const { error: insertExpError } = await supabase
+				.from("experiencia")
+				.insert(
+					newExperiencias.map((exp) => ({
+						historial: exp.historial,
+						candidato_id: candidateId,
+					})),
+				);
+
+			if (insertExpError) {
+				setStatus({ type: "error", message: insertExpError.message });
+				setIsSubmitting(false);
+				return;
+			}
+		}
+
+		for (const exp of existingExperiencias) {
+			const { error: updateExpError } = await supabase
+				.from("experiencia")
+				.update({ historial: exp.historial })
+				.eq("id", exp.id);
+
+			if (updateExpError) {
+				setStatus({ type: "error", message: updateExpError.message });
+				setIsSubmitting(false);
+				return;
+			}
+		}
+
 		// Handle propuestas updates and inserts
 		const propuestasLimpias = propuestas
 			.map((propuesta) => ({
@@ -296,6 +350,33 @@ export default function AdminEditPage() {
 		setStatus({ type: "success", message: "Candidato actualizado." });
 		setIsSubmitting(false);
 		setTimeout(() => router.push(`/candidatos/${candidateId}`), 1500);
+	};
+
+	const handleExperienciaChange = (index: number, value: string) => {
+		setExperiencias((prev) =>
+			prev.map((item, i) => (i === index ? { ...item, historial: value } : item)),
+		);
+	};
+
+	const handleAddExperiencia = () => {
+		setExperiencias((prev) => [...prev, { historial: "" }]);
+	};
+
+	const handleRemoveExperiencia = async (index: number) => {
+		const exp = experiencias[index];
+		if (exp.id) {
+			const supabase = createClient();
+			const { error } = await supabase
+				.from("experiencia")
+				.delete()
+				.eq("id", exp.id);
+
+			if (error) {
+				setStatus({ type: "error", message: "No se pudo eliminar la experiencia." });
+				return;
+			}
+		}
+		setExperiencias((prev) => prev.filter((_, i) => i !== index));
 	};
 
 	const handlePropuestaChange = (
@@ -597,6 +678,63 @@ export default function AdminEditPage() {
                                 />
                                 {form.avatar && (
                                     <p className="text-xs text-emerald-600">Foto actual cargada</p>
+                                )}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Experiencias Section */}
+                    <section className="space-y-5">
+                        <div>
+                            <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                                <span className="w-1 h-6 bg-primary rounded"></span>
+                                Experiencias Previas
+                            </h2>
+                        </div>
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <Label className="text-base font-semibold">Historial de experiencia</Label>
+                                    <p className="text-sm text-muted-foreground">Agregue experiencia laboral o cargos anteriores</p>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleAddExperiencia}
+                                    className="gap-1"
+                                >
+                                    + Agregar
+                                </Button>
+                            </div>
+
+                            <div className="space-y-3">
+                                {experiencias.map((exp, index) => (
+                                    <div key={`experiencia-${index}`} className="rounded-lg border border-input bg-card p-4 space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label htmlFor={`experiencia-${index}`} className="font-medium">
+                                                Experiencia {index + 1}
+                                            </Label>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleRemoveExperiencia(index)}
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            >
+                                                ✕ Eliminar
+                                            </Button>
+                                        </div>
+                                        <textarea
+                                            id={`experiencia-${index}`}
+                                            value={exp.historial}
+                                            onChange={(e) => handleExperienciaChange(index, e.target.value)}
+                                            placeholder="Describe la experiencia, logros, responsabilidades..."
+                                            className="min-h-[90px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                        />
+                                    </div>
+                                ))}
+                                {experiencias.length === 0 && (
+                                    <p className="text-sm text-muted-foreground">No hay experiencias registradas.</p>
                                 )}
                             </div>
                         </div>
