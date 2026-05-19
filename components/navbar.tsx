@@ -47,6 +47,7 @@ export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
   const navLinks = [
     { href: "/dashboard", label: "Inicio" },
     { href: "/candidatos", label: "Candidatos" },
+    { href: "/comparacion", label: "Comparar" },
     { href: "/eventos", label: "Eventos" },
     { href: "/articulos", label: "Artículos" },
   ];
