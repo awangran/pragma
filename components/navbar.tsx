@@ -7,6 +7,12 @@ import { User, Menu, X, Plus } from "lucide-react";
 import { LogoutButton } from "./logout-button";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -73,15 +79,28 @@ export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
             </Link>
           ))}
           {!isCheckingRole && isAdmin && (
-            <Button
-              variant="outline"
-              className="border-2 border-primary text-primary font-medium rounded-full p-2 hover:bg-primary/10"
-              asChild
-            >
-              <Link href="/admin/add-candidato" title="Agregar contenido">
-                <Plus className="h-5 w-5" />
-              </Link>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="border-2 border-primary text-primary font-medium rounded-full p-2 hover:bg-primary/10"
+                  title="Agregar contenido"
+                >
+                  <Plus className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/add-candidato">Agregar candidato</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/add-articulo">Agregar artículo</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/add-evento">Agregar evento</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
 
@@ -149,16 +168,33 @@ export function Navbar({ user }: { user?: { avatarUrl?: string } | null }) {
             ))}
 
             {!isCheckingRole && isAdmin && (
-              <Button
-                variant="outline"
-                className="w-full border-2 border-primary text-primary font-medium rounded-full flex items-center justify-center gap-2"
-                asChild
-              >
-                <Link href="/admin/add-candidato" onClick={() => setIsOpen(false)}>
-                  <Plus className="h-5 w-5" />
+              <div className="space-y-1">
+                <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                  <Plus className="h-3.5 w-3.5" />
                   Agregar contenido
+                </p>
+                <Link
+                  href="/admin/add-candidato"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-sm font-medium text-[#181C32] hover:text-blue-600 hover:bg-slate-50 rounded transition-colors"
+                >
+                  Candidato
                 </Link>
-              </Button>
+                <Link
+                  href="/admin/add-articulo"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-sm font-medium text-[#181C32] hover:text-blue-600 hover:bg-slate-50 rounded transition-colors"
+                >
+                  Artículo
+                </Link>
+                <Link
+                  href="/admin/add-evento"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-2 text-sm font-medium text-[#181C32] hover:text-blue-600 hover:bg-slate-50 rounded transition-colors"
+                >
+                  Evento
+                </Link>
+              </div>
             )}
 
             {/* Mobile Auth */}
