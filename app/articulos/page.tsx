@@ -364,7 +364,10 @@ export default async function ArticulosPage() {
         >
           <div className="mb-7">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5574ff]">Para entender la actualidad</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em]">Últimas noticias</h2>
+          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em]">Últimas novedades</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+            Explora temas de coyuntura y artículos para entender qué está cambiando en Colombia y cómo se conecta con tu vida.
+          </p>
         </div>
         {error ? (
             <div role="status" className="border-l-2 border-amber-400 bg-amber-50 px-5 py-6 text-sm leading-6 text-slate-700">
@@ -396,6 +399,9 @@ export default async function ArticulosPage() {
           <div className="mb-8 max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5574ff]">Colombia en cifras</p>
             <h2 id="cifras-title" className="mt-2 text-2xl font-semibold tracking-tight text-[#111b3f] sm:text-3xl">El país no cabe en un titular.</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              Las cifras nos ayudan a entender la realidad y a ver lo que a veces pasa desapercibido. Aquí encontrarás datos explicados de forma clara para que puedas sacar tus propias conclusiones.
+            </p>
           </div>
           <ol className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 lg:grid-cols-6 lg:gap-x-6">
             {INDICE.map((item, index) => {

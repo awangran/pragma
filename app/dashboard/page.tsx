@@ -176,8 +176,11 @@ export default async function DashboardPage() {
                 Actualidad
               </p>
               <h2 className="mt-2 text-3xl font-semibold tracking-tight text-pblack">
-                Últimas publicaciones
+                Últimas novedades
               </h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500">
+                Explora temas de coyuntura y artículos para entender qué está cambiando en Colombia y cómo se conecta con tu vida.
+              </p>
             </div>
             <Link
               href="/articulos"
@@ -285,7 +288,7 @@ export default async function DashboardPage() {
   <div className="relative mx-auto flex min-h-[420px] w-full max-w-6xl items-center px-6 py-10 md:min-h-[460px] md:py-12">
     <div className="w-full max-w-xl">
       <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#b9d8ff]">
-        La democracia también se construye
+        La democracia también se construye contigo
       </p>
 
       <h2
@@ -295,12 +298,11 @@ export default async function DashboardPage() {
         Entender para participar.
       </h2>
       <p className="mt-4 max-w-lg text-sm leading-6 text-white/90">
-        Colombia ocupa el puesto 95 entre 143 países en el Índice de Estado de Derecho 2025 del World Justice Project. Proteger nuestros derechos exige entender cómo funciona el poder y contar con información confiable para vigilarlo.
+        Colombia ocupa el puesto 95 de 143 países en el Índice de Estado de Derecho 2025 del World Justice Project. Detrás de esa cifra hay preguntas que nos conciernen: ¿se respetan nuestros derechos?, ¿quién vigila al poder?, ¿cómo exigimos que cumpla?
       </p>
 
       <p className="mt-6 max-w-lg border-l-2 border-[#c7b5f5]/70 pl-5 text-sm leading-6 text-white">
-        Pragma Radar acerca esa información para que sepas qué le corresponde hacer a cada gobernante, contrastes sus propuestas y conviertas lo que sabes en preguntas, participación y exigencia de respuestas.
-      </p>
+        Pragma Radar te ayuda a explorar esas preguntas con información clara y confiable. Aquí puedes entender qué le corresponde hacer a cada gobernante, comparar propuestas y seguir si cumplen lo que prometieron, para que formes tu propia opinión y participes con más herramientas.</p>
 
       <div className="mt-5 max-w-lg border-t border-[#b9d8ff]/25 pt-3">
         <p className="text-[0.7rem] leading-5 text-white/70">
