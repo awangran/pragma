@@ -2,13 +2,13 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { MapPin } from "lucide-react";
+import { MapPin, ArrowRight, ExternalLink } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import Footer from "@/components/footer";
 import { PropuestasClient } from "@/components/propuestas-client";
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 
 interface CandidateProfilePageProps {
   params: Promise<{ slug: string }>;
@@ -17,10 +17,13 @@ interface CandidateProfilePageProps {
 export default async function CandidateProfilePage({ params }: CandidateProfilePageProps) {
   const supabase = await createClient();
   const { slug } = await params;
-  const candidateId = parseInt(slug, 10);
+  const candidateId = Number(slug);
+  if (!Number.isSafeInteger(candidateId) || candidateId <= 0) notFound();
+
+  if (candidateId === 14) {redirect("/seguimiento");}
 
   const { data: userData } = await supabase.auth.getUser();
-  const user = (userData && (userData as any).user) ? (userData as any).user : null;
+  const user = userData?.user ?? null;
   const avatarUrl = user?.user_metadata?.avatar_url ?? null;
   
   const { data: candidate } = await supabase
@@ -54,15 +57,20 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
     {} as Record<string, string | null>
   );
 
-  const propuestasArray = (propuestasRaw ?? []) as Array<{
+  const propuestasConRelacion = (propuestasRaw ?? []) as Array<{
     id: string;
     titulo: string;
     tema_id: string | number | null;
     que_pasa: string | null;
     que_propone: string | null;
     que_cambia: string | null;
-    tema?: { titulo?: string | null; tituloExtendido?: string | null } | null;
+    tema?: { titulo?: string | null; tituloExtendido?: string | null } | Array<{ titulo?: string | null; tituloExtendido?: string | null }> | null;
   }>;
+
+  const propuestasArray = propuestasConRelacion.map((propuesta) => ({
+    ...propuesta,
+    tema: Array.isArray(propuesta.tema) ? propuesta.tema[0] ?? null : propuesta.tema,
+  }));
 
   const experienciaArray: string[] = ((experienciaRaw ?? []) as Array<{ historial: string | null }>)
     .map((item: { historial: string | null }) => {
@@ -86,10 +94,11 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
 
   const propuestasPorTema = propuestasArray.reduce(
     (acc, propuesta) => {
-      const titulo = propuesta.tema?.titulo ?? "Sin tema";
+      const tema = Array.isArray(propuesta.tema) ? propuesta.tema[0] : propuesta.tema;
+      const titulo = tema?.titulo ?? "Sin tema";
       if (!acc[titulo]) {
         acc[titulo] = {
-          tituloExtendido: propuesta.tema?.tituloExtendido ?? null,
+          tituloExtendido: tema?.tituloExtendido ?? null,
           temaId: `tema-${slugifyTema(titulo)}`,
           items: [],
         };
@@ -112,10 +121,10 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
   }
 
   if (!candidate || !candidateId) {
-    return <div className="p-8 text-center">Candidato no encontrado.</div>;
+    notFound();
   }
 
-  async function deleteCandidateAction(_formData: FormData) {
+  async function deleteCandidateAction() {
     "use server";
 
     const supabase = await createClient();
@@ -145,213 +154,169 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
     redirect("/candidatos");
   }
 
+  // Solo Abelardo (id=14) fue electo
+  const esElecto = candidateId === 14;
+
+  const enlaces: URL[] = (typeof candidate.links === "string" ? candidate.links.split(",") : [])
+    .map((value: string) => {
+      try {
+        const url = new URL(value.trim().startsWith("http") ? value.trim() : `https://${value.trim()}`);
+        return ["http:", "https:"].includes(url.protocol) ? url : null;
+      } catch {
+        return null;
+      }
+    })
+    .filter((url: URL | null): url is URL => url !== null);
 
   return (
-    <Suspense fallback={
-      <div className="flex flex-col items-center">
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8 py-6 sm:py-8">
-          <div className="h-4 w-32 bg-slate-200 rounded animate-pulse mb-6" />
-          <div className="rounded-2xl p-4 sm:p-6 bg-slate-100 animate-pulse">
-            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-              <div className="h-20 sm:h-24 w-20 sm:w-24 rounded-full bg-slate-300" />
-              <div className="flex-1 space-y-2 w-full">
-                <div className="h-6 bg-slate-300 rounded w-3/4" />
-                <div className="h-4 bg-slate-200 rounded w-1/2" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    }>
-
-     <Suspense fallback={<Navbar user={null} />}>
+    <div className="w-full bg-white text-[#111b3f]">
+      <Suspense fallback={<Navbar user={null} />}>
         <Navbar user={user ? { avatarUrl } : null} />
       </Suspense>
 
-      <div className="flex flex-col items-center">
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8 py-6 sm:py-8">
-          {/* Breadcrumb */}
-          <nav className="mb-4 sm:mb-6 flex items-center gap-2 text-xs sm:text-sm">
-            <Link 
-              href="/candidatos" 
-              className="text-blue-600 hover:text-blue-700 hover:underline transition-colors"
-            >
-              Candidatos
-            </Link>
-            <span className="text-slate-400">/</span>
-            <span className="text-slate-600 truncate">{candidate.nombre}</span>
+      <main>
+        <div className="mx-auto w-full max-w-7xl px-4 pt-5 sm:px-6">
+          <nav aria-label="Ruta de navegación" className="mb-5 flex min-w-0 items-center gap-2 text-xs text-slate-500">
+            <Link href="/candidatos" className="shrink-0 font-medium text-[#4774ff] hover:underline">Candidatos</Link>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page" className="truncate">{candidate.nombre}</span>
           </nav>
 
-          {/* Header */}
-          <div
-            className="relative mb-6 sm:mb-8 rounded-2xl p-4 sm:p-6 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: "url('/soft-gradient.svg')" }}
-          >
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-              {/* Avatar */}
-              {candidate.avatar ? (
-                <div className="h-20 sm:h-24 w-20 sm:w-24 shrink-0 overflow-hidden rounded-full shadow-lg">
+          {/* IDENTIDAD — UN ÚNICO ENCABEZADO PARA EL PERFIL */}
+          <header className="relative isolate overflow-hidden rounded-[32px] bg-[#eef2ff] sm:rounded-[38px]">
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-[#e1eeff] via-[#eee8ff] to-[#d9f2ff]" />
+            <div aria-hidden="true" className="absolute -right-16 -top-24 h-80 w-80 rounded-full border border-white/70" />
+            <div aria-hidden="true" className="absolute -right-4 -top-12 h-56 w-56 rounded-full bg-white/30" />
+            <div className="relative grid items-center gap-7 p-7 sm:p-10 sm:grid-cols-[auto_1fr] lg:gap-10 lg:p-9">
+              <div className="shrink-0 overflow-hidden rounded-[24px] bg-white/70 ring-4 ring-white/70" style={{ width: 144, height: 168 }}>
+                {candidate.avatar ? (
                   <Image
-                    src={candidate.avatar as string}
-                    alt={`profile photo`}
-                    width={96}
-                    height={96}
+                    src={String(candidate.avatar)}
+                    alt={`Retrato de ${candidate.nombre}`}
+                    width={144}
+                    height={168}
+                    unoptimized
                     className="h-full w-full object-cover"
                   />
-                </div>
-              ) : (
-                <div className="h-20 sm:h-24 w-20 sm:w-24 shrink-0 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 border-4 border-white shadow-lg" />
-              )}
-
-              {/* Main identity */}
-              <div className="flex flex-1 flex-col justify-between gap-2 sm:gap-3">
-                <div className="flex flex-col">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">{candidate.nombre}</h1>
-                  {candidate.cargo && (
-                    <p className="text-sm sm:text-base text-slate-600 mt-1">{candidate.cargo}</p>
-                  )}
-                  <div className="mt-2 sm:mt-3 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex w-max items-center justify-center rounded-full border border-blue-300 bg-blue-50 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-blue-700">
-                      {candidate.partido}
-                    </span>
-                    {candidate.ubicacion && (
-                      <span className="inline-flex items-center gap-1 text-xs sm:text-sm text-slate-700">
-                        <MapPin className="h-3 sm:h-4 w-3 sm:w-4 text-slate-500" aria-hidden />
-                        {candidate.ubicacion}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {isAdmin && (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link
-                      href={`/admin/edit-candidato/${candidateId}`}
-                      className="inline-flex w-max items-center justify-center rounded-lg border border-blue-300 bg-blue-50 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
-                    >
-                      ✎ Editar candidato
-                    </Link>
-                    <DeleteCandidateButton
-                      action={deleteCandidateAction}
-                      confirmMessage="¿Seguro que quieres eliminar este candidato? Esta acción no se puede deshacer."
-                      className="inline-flex w-max items-center justify-center rounded-lg border border-red-300 bg-red-50 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-red-700 hover:bg-red-100 transition-colors"
-                    >
-                      Eliminar candidato
-                    </DeleteCandidateButton>
-                  </div>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-5xl font-semibold text-[#5574ff]">{String(candidate.nombre ?? "").charAt(0)}</div>
                 )}
               </div>
-            </div>
-          </div>
-
-              {/* Main content */}
-            <div className="grid grid-cols-12 gap-4 sm:gap-6">
-              {/* Left column */}
-              <div className="col-span-12 lg:col-span-8">
-                {/* Biografía */}
-                <section className="mb-4 sm:mb-6 rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-                  <h2 className="mb-2 text-sm sm:text-base font-semibold text-slate-900">Biografía</h2>
-                  <p className="text-xs sm:text-sm text-slate-700">
-                    {candidate.descripcion || "No hay biografía disponible."}
-                  </p>
-                </section>
-
-                {/* Experiencia */}
-                <section className="mb-4 sm:mb-6 rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-                  <h2 className="mb-2 text-sm sm:text-base font-semibold text-slate-900">Experiencia</h2>
-                  {experienciaArray.length > 0 ? (
-                    <ul className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-slate-700">
-                      {experienciaArray.map((historial: string, index: number) => (
-                        <li key={`${historial}-${index}`} className="whitespace-pre-line">
-                          {historial}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-xs sm:text-sm text-slate-700">No hay experiencia registrada.</p>
-                  )}
-                </section>
-
-                {/* Propuestas */}
-                <section className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm sm:text-base font-semibold text-slate-900">Propuestas</h2>
-                    <span className="hidden sm:inline-flex items-center rounded-full bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 text-xs">
-                      {propuestasArray.length} en total
-                    </span>
-                  </div>
-                  <p className="mb-4 text-xs sm:text-sm text-slate-600">
-                    Vista organizada por tema. Haz clic para expandir cada sección.
-                  </p>
-                  <PropuestasClient
-                    propuestasPorTema={propuestasPorTema}
-                    propuestasArray={propuestasArray}
-                    tipsMap={tipsMap}
-                  />
-                </section>
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6555c9]">Trayectoria y propuestas</p>
+                <h1 className="mt-3 max-w-4xl text-3xl font-semibold leading-[1.04] tracking-[-0.04em] sm:text-4xl lg:text-4xl">{candidate.nombre}</h1>
+                {candidate.cargo && <p className="mt-3 text-sm text-slate-600 sm:text-base">{candidate.cargo}</p>}
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  {candidate.partido && <span className="rounded-full border border-white/80 bg-white/65 px-3 py-1.5 text-xs font-medium text-[#3458ac]">{candidate.partido}</span>}
+                  {candidate.ubicacion && <span className="inline-flex items-center gap-1.5 text-xs text-slate-600"><MapPin aria-hidden="true" className="h-3.5 w-3.5" />{candidate.ubicacion}</span>}
+                </div>
+                <div className="mt-6 flex flex-wrap items-center gap-4">
+                  <p className="text-xs text-slate-600">{propuestasArray.length} propuestas · {Object.keys(propuestasPorTema).length} temas</p>
+                </div>
               </div>
-
-              {/* Right column */}
-              <aside className="col-span-12 lg:col-span-4 space-y-4 sm:space-y-6">
-    
-
-                {/* Links relacionados */}
-                <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-                  <h3 className="mb-3 text-sm font-semibold text-slate-900">Links relacionados</h3>
-                  <ul className="flex flex-col gap-2">
-                    {(candidate.links
-                      ? candidate.links.split(",").map((link: string) => link.trim()).filter(Boolean)
-                      : []
-                    ).map((href: string, i: number) => (
-                      <li key={`${href}-${i}`}>
-                        <a
-                          href={href.startsWith("http") ? href : `https://${href}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs sm:text-sm text-blue-700 hover:underline break-all"
-                        >
-                          {href}
-                        </a>
-                      </li>
-                    ))}
-                    {(!candidate.links || candidate.links.trim().length === 0) && (
-                      <li className="text-xs sm:text-sm text-slate-600">Sin enlaces relacionados.</li>
-                    )}
-                  </ul>
-                </div>
-
-                {/* Filtrar por tema */}
-                <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-                  <h3 className="mb-3 text-sm font-semibold text-slate-900">Filtrar por tema</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.entries(propuestasPorTema).map(([temaTitulo, data]) => {
-                      const temaId = `tema-${slugifyTema(temaTitulo)}`;
-                      return (
-                        <a
-                          key={temaTitulo}
-                          href={`#${temaId}`}
-                          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
-                        >
-                          {temaTitulo}
-                          <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 text-[10px]">
-                            {data.items.length}
-                          </span>
-                        </a>
-                      );
-                    })}
-                    {propuestasArray.length === 0 && (
-                      <span className="text-sm text-slate-600">Sin temas disponibles.</span>
-                    )}
-                  </div>
-                </div>
-                
-              </aside>
-
             </div>
-          </div> 
+          </header>
+
+          {esElecto && (
+            <div className="mt-5 flex flex-col gap-4 border-l-2 border-[#5574ff] bg-[#f5f7ff] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold">Seguimiento de gobierno</p>
+                <p className="mt-1 text-xs leading-6 text-slate-600">Consulta las actualizaciones de sus compromisos y las instituciones vinculadas.</p>
+              </div>
+              <Link href="/seguimiento" className="inline-flex shrink-0 items-center gap-2 text-xs font-semibold text-[#3458d8]">Ver seguimiento<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+            </div>
+          )}
+
+          {isAdmin && (
+            <div className="mt-5 flex flex-wrap items-center gap-3 border-b border-slate-100 pb-5">
+              <span className="text-xs text-slate-500">Administración</span>
+              <Link href={`/admin/edit-candidato/${candidateId}`} className="rounded-full border border-blue-200 px-4 py-2 text-xs font-medium text-blue-700 hover:bg-blue-50">Editar candidato</Link>
+              <DeleteCandidateButton action={deleteCandidateAction} confirmMessage="¿Seguro que quieres eliminar este candidato? Esta acción no se puede deshacer." className="rounded-full border border-red-200 px-4 py-2 text-xs font-medium text-red-700 hover:bg-red-50">Eliminar candidato</DeleteCandidateButton>
+            </div>
+          )}
         </div>
 
-        <Footer />
-      </Suspense>
-    );
-  }
+        {/* NAVEGACIÓN CONTINUA: EL PERFIL Y SUS PROPUESTAS */}
+        <nav aria-label="Secciones del perfil" className="sticky top-0 z-10 mt-7 border-y border-[#e2e9f8] bg-white/95 backdrop-blur-md">
+          <div className="mx-auto flex max-w-6xl gap-6 overflow-x-auto px-6 py-4 text-sm font-medium sm:gap-9">
+            <a href="#perfil" className="shrink-0 text-slate-600 hover:text-[#4774ff]">Perfil y trayectoria</a>
+            <a href="#propuestas" className="shrink-0 text-[#3458d8]">Propuestas <span className="ml-1 text-xs text-slate-500">{propuestasArray.length}</span></a>
+            <a href="#enlaces" className="shrink-0 text-slate-600 hover:text-[#4774ff]">Enlaces</a>
+          </div>
+        </nav>
+
+        <div className="mx-auto w-full max-w-6xl px-6">
+          {/* BIOGRAFÍA Y TRAYECTORIA: UN SOLO DESTINO EN LA NAVEGACIÓN */}
+          <div id="perfil" className="grid scroll-mt-24 items-start gap-7 py-8 lg:grid-cols-[1fr_1.05fr] lg:gap-10">
+            <section id="biografia" aria-labelledby="biografia-title" className="min-w-0 scroll-mt-24">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#5574ff]">El perfil</p>
+              <h2 id="biografia-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">Quién es.</h2>
+              <p className="mt-4 whitespace-pre-line text-[13px] leading-6 text-slate-600">{candidate.descripcion || "No hay biografía registrada."}</p>
+            </section>
+            <section id="trayectoria" aria-labelledby="trayectoria-title" className="min-w-0 scroll-mt-24 border-t border-[#e2e9f8] pt-6 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#5574ff]">Su recorrido</p>
+              <h2 id="trayectoria-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">Trayectoria.</h2>
+              {experienciaArray.length > 0 ? (
+                <div className="mt-4">
+                  <ul className="space-y-4 border-l border-[#cddaff] pl-4">
+                    {experienciaArray.slice(0, 2).map((historial: string, index: number) => <li key={`${historial}-${index}`} className="relative whitespace-pre-line text-[13px] leading-6 text-slate-600"><span aria-hidden="true" className="absolute -left-[21px] top-2 h-2 w-2 rounded-full bg-[#5574ff] ring-4 ring-white" />{historial}</li>)}
+                  </ul>
+                  {experienciaArray.length > 2 && <details className="group mt-4"><summary className="w-fit cursor-pointer text-xs font-semibold text-[#3458d8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5574ff]"><span className="group-open:hidden">Ver trayectoria completa</span><span className="hidden group-open:inline">Mostrar menos</span></summary><ul className="mt-4 space-y-4 border-l border-[#cddaff] pl-4">{experienciaArray.slice(2).map((historial: string, index: number) => <li key={`${historial}-${index}`} className="relative whitespace-pre-line text-[13px] leading-6 text-slate-600"><span aria-hidden="true" className="absolute -left-[21px] top-2 h-2 w-2 rounded-full bg-[#5574ff] ring-4 ring-white" />{historial}</li>)}</ul></details>}
+                </div>
+              ) : <p className="mt-4 text-[13px] text-slate-500">No hay experiencia registrada.</p>}
+            </section>
+          </div>
+
+          {/* PAUSA COMÚN A TODOS LOS PERFILES, SIN ATRIBUIR PROMESAS */}
+          <section aria-labelledby="contexto-title" className="relative isolate my-3 overflow-hidden rounded-[28px] bg-[#111b3f] text-white">
+            <Image src="/guajira3.jpg" alt="La Guajira" fill sizes="(max-width: 1200px) 100vw, 1104px" className="object-cover object-center" />
+            <div aria-hidden="true" className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(17,27,63,0.90) 0%, rgba(17,27,63,0.75) 45%, rgba(17,27,63,0.12) 100%)" }} />
+            <div className="relative px-6 py-12 sm:px-9 sm:py-14" style={{ minHeight: 260 }}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-100">Del recorrido a la visión del país</p>
+              <h2 id="contexto-title" className="mt-4 max-w-lg text-3xl font-semibold leading-[1.05] tracking-[-0.035em] sm:text-4xl">Una propuesta se entiende desde la vida que busca cambiar.</h2>
+              <p className="mt-4 max-w-md text-sm leading-7 text-white/90">Revisa qué problema identifica, qué acción plantea y qué resultado espera.</p>
+            </div>
+          </section>
+
+          {/* PROPUESTAS: PROTAGONISTAS, A TODO EL ANCHO */}
+          <section id="propuestas" aria-labelledby="propuestas-title" className="scroll-mt-24 border-t border-[#e2e9f8] py-10 md:py-12">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="max-w-2xl">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#5574ff]">Su visión del país</p>
+                <h2 id="propuestas-title" className="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Qué propone y qué busca cambiar.</h2>
+                <p className="mt-4 text-sm leading-7 text-slate-600">Abre un tema para revisar el problema que identifica, la acción que plantea y el cambio que propone.</p>
+              </div>
+              <span className="w-fit shrink-0 rounded-full bg-[#edf2ff] px-4 py-2 text-xs font-medium text-[#3458ac]">{propuestasArray.length} propuestas registradas</span>
+            </div>
+            <div className="mt-7">
+              {propuestasArray.length > 0 ? (
+                <PropuestasClient propuestasPorTema={propuestasPorTema} propuestasArray={propuestasArray} tipsMap={tipsMap} candidato={{ nombre: String(candidate.nombre ?? ""), avatar: typeof candidate.avatar === "string" ? candidate.avatar : null }} />
+              ) : <p className="border-y border-slate-100 py-8 text-sm text-slate-500">Todavía no hay propuestas registradas para este perfil.</p>}
+            </div>
+          </section>
+
+          <section id="enlaces" aria-labelledby="enlaces-title" className="flex scroll-mt-24 flex-col gap-4 border-t border-[#e2e9f8] py-6 sm:flex-row sm:items-center sm:justify-between">
+            <div><h2 id="enlaces-title" className="text-sm font-semibold">Para seguir leyendo</h2><p className="mt-1 text-xs text-slate-500">Sitios relacionados con este perfil.</p></div>
+            {enlaces.length > 0 ? <ul className="flex flex-wrap gap-2">{enlaces.map((url: URL, index: number) => <li key={`${url.href}-${index}`}><a href={url.href} title={url.href} target="_blank" rel="noopener noreferrer" className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#dbe3f5] bg-[#f7f9ff] px-4 py-2.5 text-xs font-medium text-[#3458ac] transition hover:border-[#9bb6ff] hover:bg-[#edf2ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5574ff]"><span className="break-all">{url.hostname.replace(/^www\./, "")}{enlaces.filter((other: URL) => other.hostname === url.hostname).length > 1 ? ` · ${index + 1}` : ""}</span><ExternalLink aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /><span className="sr-only">{url.pathname} (abre en otra pestaña)</span></a></li>)}</ul> : <p className="text-xs text-slate-500">Sin enlaces registrados.</p>}
+          </section>
+        </div>
+
+        {/* COMPARADOR: UNA CONVERSACIÓN ENTRE PERSPECTIVAS */}
+        <section aria-labelledby="contrastar-title" className="border-y border-[#e2e9f8] bg-[#f2f5ff]">
+          <div className="mx-auto grid max-w-7xl md:grid-cols-[1.15fr_0.85fr]">
+            <div className="flex items-center px-6 py-9 sm:px-10 lg:px-14">
+              <div className="max-w-lg">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#5574ff]">Una perspectiva entre varias</p>
+                <h2 id="contrastar-title" className="mt-3 text-3xl font-semibold leading-[1.05] tracking-[-0.035em]">Las mismas preguntas.<br />Distintas posiciones.</h2>
+                <p className="mt-4 text-sm leading-6 text-slate-600">Contrasta este perfil con otras candidaturas e identifica dónde coinciden y dónde difieren.</p>
+                <Link href="/comparacion" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#243d9b] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#111b3f]">Abrir comparador<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+              </div>
+            </div>
+            <div className="relative" style={{ minHeight: 260 }}><Image src="/candidatos.png" alt="Personas conversando e intercambiando perspectivas alrededor de una mesa" fill sizes="(max-width: 768px) 100vw, 544px" className="object-cover object-[center_85%]" /></div>
+          </div>
+        </section>
+      </main>
+      <footer><Suspense fallback={<div className="px-8 py-6 text-sm text-slate-500">Cargando pie de página…</div>}><Footer /></Suspense></footer>
+    </div>
+  );
+}

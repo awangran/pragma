@@ -63,7 +63,6 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ id, nombre, cargo, partid
   const showAvatar = !!avatar && !imageError;
 
   const badgeClasses = `inline-flex items-center justify-center rounded-md border px-2.5 py-0.5 text-xs font-medium ${theme.badgeBg} ${theme.badgeBorder} ${theme.badgeText}`;
-  const errorCircleClasses = `h-16 w-16 shrink-0 rounded-full ${theme.circle}`;
   const placeholderCircleClasses = "h-12 w-12 shrink-0 rounded-full bg-gray-200";
 
   return (

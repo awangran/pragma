@@ -9,7 +9,7 @@ interface ArticleCardProps {
   titulo: string;
   resumen: string;
   categoria: string;
-  foto?: string;
+  foto?: string | null;
 }
 
 const CATEGORY_THEME: Record<string, { bg: string; text: string }> = {
@@ -35,18 +35,23 @@ export default function ArticleCard({
   const [imageError, setImageError] = useState(false);
   const theme = getCategoryTheme(categoria);
   const slug = `/articulos/${id}`;
+  const normalizar = (texto: string) => texto.trim().toLocaleLowerCase("es-CO");
+  const mostrarCategoria = Boolean(categoria) && normalizar(categoria) !== "artículos";
+  const mostrarResumen = Boolean(resumen) && normalizar(resumen) !== normalizar(titulo);
 
   return (
     <Link
       href={slug}
-      className="group flex flex-col rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+      className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-[#dfe7f8] bg-white transition-colors hover:border-[#a5b8ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5574ff]"
     >
       {/* Image */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-indigo-200 via-blue-300 to-violet-300">
         {foto && !imageError ? (
           <Image
             src={foto}
-            alt={titulo}
+            alt=""
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            unoptimized
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             onError={() => setImageError(true)}
@@ -59,26 +64,21 @@ export default function ArticleCard({
       {/* Content */}
       <div className="flex flex-col gap-2 p-4">
         {/* Category */}
-        <span
-          className={`text-[11px] sm:text-xs font-medium ${theme.text}`}
-        >
-          {categoria}
-        </span>
+        {mostrarCategoria && (
+          <span className={`text-[10px] font-semibold uppercase tracking-[0.14em] ${theme.text}`}>
+            {categoria}
+          </span>
+        )}
 
         {/* Title */}
-        <h3 className="text-sm sm:text-base font-semibold text-slate-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-sm sm:text-base font-semibold text-[#111b3f] line-clamp-2 group-hover:text-[#5574ff] transition-colors">
           {titulo}
         </h3>
 
         {/* Summary */}
-        <p className="text-xs sm:text-sm text-slate-600 line-clamp-2">
-          {resumen}
-        </p>
-
-        {/* Read more */}
-        <span className="mt-2 text-xs sm:text-sm font-medium text-blue-600 group-hover:underline">
-          Leer más
-        </span>
+        {mostrarResumen && (
+          <p className="line-clamp-2 text-xs leading-6 text-slate-600 sm:text-sm">{resumen}</p>
+        )}
       </div>
     </Link>
   );
