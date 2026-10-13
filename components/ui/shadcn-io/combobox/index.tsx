@@ -108,7 +108,7 @@ export const Combobox = ({
         setInputValue,
       }}
     >
-      <Popover {...(props as any)} onOpenChange={onOpenChange} open={open} />
+      <Popover {...props} onOpenChange={onOpenChange} open={open} />
     </ComboboxContext.Provider>
   );
 };
@@ -145,7 +145,7 @@ export const ComboboxTrigger = ({
 
   return (
     <PopoverTrigger asChild>
-      <Button variant="outline" {...(props as any)} ref={ref}>
+      <Button variant="outline" {...props} ref={ref}>
         {children ?? (
           <span className="flex w-full items-center justify-between gap-2">
             {value
@@ -179,7 +179,7 @@ export const ComboboxContent = ({
       style={{ width }}
       {...popoverOptions}
     >
-      <Command {...(props as any)} />
+      <Command {...props} />
     </PopoverContent>
   );
 };
@@ -214,7 +214,7 @@ export const ComboboxInput = ({
       onValueChange={onValueChange}
       placeholder={`Search ${type}...`}
       value={value}
-      {...(props as any)}
+      {...props}
     />
   );
 };
@@ -222,7 +222,7 @@ export const ComboboxInput = ({
 export type ComboboxListProps = ComponentProps<typeof CommandList>;
 
 export const ComboboxList = (props: ComboboxListProps) => (
-  <CommandList {...(props as any)} />
+  <CommandList {...props} />
 );
 
 export type ComboboxEmptyProps = ComponentProps<typeof CommandEmpty>;
@@ -231,14 +231,14 @@ export const ComboboxEmpty = ({ children, ...props }: ComboboxEmptyProps) => {
   const { type } = useContext(ComboboxContext);
 
   return (
-    <CommandEmpty {...(props as any)}>{children ?? `No ${type} found.`}</CommandEmpty>
+    <CommandEmpty {...props}>{children ?? `No ${type} found.`}</CommandEmpty>
   );
 };
 
 export type ComboboxGroupProps = ComponentProps<typeof CommandGroup>;
 
 export const ComboboxGroup = (props: ComboboxGroupProps) => (
-  <CommandGroup {...(props as any)} />
+  <CommandGroup {...props} />
 );
 
 export type ComboboxItemProps = ComponentProps<typeof CommandItem>;
@@ -252,7 +252,7 @@ export const ComboboxItem = (props: ComboboxItemProps) => {
         onValueChange(currentValue);
         onOpenChange(false);
       }}
-      {...(props as any)}
+      {...props}
     />
   );
 };
@@ -260,7 +260,7 @@ export const ComboboxItem = (props: ComboboxItemProps) => {
 export type ComboboxSeparatorProps = ComponentProps<typeof CommandSeparator>;
 
 export const ComboboxSeparator = (props: ComboboxSeparatorProps) => (
-  <CommandSeparator {...(props as any)} />
+  <CommandSeparator {...props} />
 );
 
 export type ComboboxCreateNewProps = {
@@ -302,7 +302,7 @@ export const ComboboxCreateNew = ({
         <>
           <PlusIcon className="h-4 w-4 text-muted-foreground" />
           <span>
-            Create new {type}: "{inputValue}"
+            Create new {type}: &ldquo;{inputValue}&rdquo;
           </span>
         </>
       )}

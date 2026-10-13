@@ -1,7 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Candidate } from "@/types/candidates";
+export type ElectoralCandidate = {
+  id: number;
+  nombre: string | null;
+  cargo: string | null;
+  partido: string | null;
+  avatar: string | null;
+  ubicacion: string | null;
+  tipo: string | null;
+  anio_eleccion: number | null;
+  ciudad_eleccion: string | null;
+};
+const CIUDADES = ["Bogotá", "Medellín", "Cali", "Barranquilla", "Cartagena", "Santa Marta", "Bucaramanga", "Quibdó", "Riohacha"];
+const normalize = (value: string | null | undefined) => (value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
 import type { Tema } from "@/types/tema";
 
 import CandidateCard from "@/components/candidate-card";
@@ -15,35 +27,27 @@ import {
 import { Search, ChevronDown } from "lucide-react";
 
 type Props = {
-  candidates: Candidate[];
+  candidates: ElectoralCandidate[];
+  electionMode?: "local" | "presidential";
   temas: Tema[];
 };
 
-export default function CandidatesFilterClient({ candidates, temas }: Props) {
+export default function CandidatesFilterClient({ candidates, electionMode = "presidential" }: Props) {
+  const isLocal = electionMode === "local";
   const [query, setQuery] = useState("");
-  const [region, setRegion] = useState<string | null>(null);
-
-  const regions = useMemo(() => {
-    const set = new Set<string>();
-    for (const c of candidates as any[]) {
-      const r = c.ubicacion;
-      if (r && typeof r === "string") set.add(r);
-    }
-    return Array.from(set).sort();
-  }, [candidates]);
+  const [region, setRegion] = useState<string | null>(isLocal ? "Bogotá" : null);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return (candidates ?? []).filter((c: any) => {
+    const q = normalize(query);
+    return (candidates ?? []).filter((c) => {
       const matchesQuery = !q
-        || c.nombre?.toLowerCase().includes(q)
-        || c.cargo?.toLowerCase().includes(q)
-        || c.partido?.toLowerCase().includes(q);
-      const candidateRegion = c.ubicacion;
-      const matchesRegion = !region || candidateRegion === region;
+        || normalize(c.nombre).includes(q)
+        || normalize(c.cargo).includes(q)
+        || normalize(c.partido).includes(q);
+      const matchesRegion = !isLocal || !region || normalize(c.ciudad_eleccion) === normalize(region);
       return matchesQuery && matchesRegion;
     });
-  }, [candidates, query, region]);
+  }, [candidates, query, region, isLocal]);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -57,17 +61,18 @@ export default function CandidatesFilterClient({ candidates, temas }: Props) {
             className="h-11 rounded-xl bg-slate-50 pl-9 text-sm"
           />
         </div>
+        {isLocal && (
         <div className="flex items-center gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="h-11 rounded-xl bg-slate-50 px-4 text-sm font-medium text-slate-800 shadow-sm inline-flex items-center gap-2">
-                {region ?? "Todas las regiones"}
+                {region ?? "Todas las ciudades"}
                 <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => setRegion(null)}>Todas las regiones</DropdownMenuItem>
-              {regions.map((r) => (
+              <DropdownMenuItem onClick={() => setRegion(null)}>Todas las ciudades</DropdownMenuItem>
+              {CIUDADES.map((r) => (
                 <DropdownMenuItem key={r} onClick={() => setRegion(r)}>
                   {r}
                 </DropdownMenuItem>
@@ -75,20 +80,27 @@ export default function CandidatesFilterClient({ candidates, temas }: Props) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        )}
       </div>
 
       <p className="text-sm text-slate-700">Mostrando {filtered.length} resultados</p>
 
+      {filtered.length === 0 && (
+        <div className="border-t border-[#e2e9f8] py-8">
+          <p className="text-sm font-semibold text-[#111b3f]">{isLocal && !query.trim() ? `Próximamente: candidaturas${region ? ` de ${region}` : " locales de 2027"}.` : "No encontramos perfiles con esos filtros."}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-500">{isLocal && !query.trim() ? "Publicaremos los perfiles y sus propuestas a medida que estén disponibles." : "Prueba con otro nombre o cambia el filtro."}</p>
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {filtered.map((candidate: any, index: number) => (
+        {filtered.map((candidate) => (
           <CandidateCard
-            key={candidate.id ?? candidate.nombre ?? index}
-            id={candidate.id ?? index}
-            nombre={candidate.nombre}
-            cargo={candidate.cargo}
-            partido={candidate.partido}
-            avatar={candidate.avatar}
-            ubicacion={candidate.ubicacion}
+            key={candidate.id}
+            id={candidate.id}
+            nombre={candidate.nombre ?? ""}
+            cargo={candidate.cargo ?? ""}
+            partido={candidate.partido ?? ""}
+            avatar={candidate.avatar ?? ""}
+            ubicacion={(isLocal ? candidate.ciudad_eleccion ?? candidate.ubicacion : candidate.ubicacion) ?? ""}
           />
         ))}
       </div>
