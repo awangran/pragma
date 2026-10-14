@@ -56,7 +56,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ id, nombre, cargo, partid
   const theme = getPartyTheme(partido);
   const [imageError, setImageError] = useState(false);
 
-  const slug = `/candidatos/${id}`;
+  const slug = id === 14 || id === 21 ? "/seguimiento#gobierno" : `/candidatos/${id}`;
 
   useEffect(() => setImageError(false), [avatar]);
 

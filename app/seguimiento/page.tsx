@@ -212,15 +212,16 @@ async function GabineteSection() {
         cargo,
         bio,
         activo,
-        candidato:candidato_id (
-          id,
-          nombre,
-          ubicacion,
-          avatar
-        )
+        nombre,
+        ubicacion,
+        avatar,
+        fecha_inicio
       )
     `)
-    .order("nombre", { ascending: true });
+    .eq("funcionarios_ministerio.activo", true)
+    .order("nombre", { ascending: true })
+    .order("fecha_inicio", { referencedTable: "funcionarios_ministerio", ascending: false, nullsFirst: false })
+    .order("id", { referencedTable: "funcionarios_ministerio", ascending: false });
 
   if (error) {
     console.error("Error cargando ministerios:", error);
@@ -235,14 +236,9 @@ async function GabineteSection() {
       const funcionario = funcionarios.find((item) => item.activo === true) ?? null;
       if (!funcionario) return null;
 
-      const candidato = Array.isArray(funcionario.candidato)
-        ? funcionario.candidato[0] ?? null
-        : funcionario.candidato;
-      if (!candidato) return null;
-
       return {
         ...ministerio,
-        funcionario: { ...funcionario, candidato },
+        funcionario,
       };
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
@@ -265,10 +261,10 @@ async function GabineteSection() {
       className="group flex items-center gap-4 border-b border-[#dfe7f8] py-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5574ff]"
     >
       <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-[14px] bg-[#edf2ff] sm:w-20">
-        {ministerio.funcionario.candidato.avatar ? (
+        {ministerio.funcionario.avatar ? (
           <Image
-            src={ministerio.funcionario.candidato.avatar}
-            alt={ministerio.funcionario.candidato.nombre ?? "Ministro o ministra"}
+            src={ministerio.funcionario.avatar}
+            alt={ministerio.funcionario.nombre ?? "Ministro o ministra"}
             fill
             sizes="80px"
             unoptimized
@@ -276,7 +272,7 @@ async function GabineteSection() {
           />
         ) : (
           <span aria-hidden="true" className="flex h-full items-center justify-center text-lg font-semibold text-[#7863bd]">
-            {(ministerio.funcionario.candidato.nombre ?? "")
+            {(ministerio.funcionario.nombre ?? "")
               .trim()
               .split(/\s+/)
               .filter(Boolean)
@@ -290,7 +286,7 @@ async function GabineteSection() {
         <h4 className="text-base font-semibold leading-6 tracking-[-0.025em] text-[#111b3f] group-hover:text-[#243d9b]">
           {ministerio.nombre.replace(/^Ministerio\s+(?:de\s+|del\s+|para\s+)?/i, "")}
         </h4>
-        <p className="mt-1 text-xs leading-5 text-slate-600">{ministerio.funcionario.candidato.nombre}</p>
+        <p className="mt-1 text-xs leading-5 text-slate-600">{ministerio.funcionario.nombre}</p>
       </div>
       <span className="shrink-0 text-[#5574ff]">
         <ArrowIcon />
@@ -672,7 +668,7 @@ export default function SeguimientoPage() {
                   La política no<br />termina cuando<br />votas.
                 </h1>
                 <p className="mt-6 max-w-xl text-sm leading-7 text-white/90 sm:text-base">
-                  Esta veeduría responde tres preguntas: quién dirige el Gobierno, qué hace cada ministerio y si los compromisos de campaña se están cumpliendo. Todos los datos incluyen su fuente.
+                  Esta veeduría sigue la gestión del Gobierno: quiénes lo integran, qué acciones adelantan sus ministerios y cómo avanzan los compromisos de campaña.
                 </p>
               </div>
             </div>

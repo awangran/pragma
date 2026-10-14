@@ -48,23 +48,17 @@ type Ministerio = {
   logo: string | null;
 };
 
-type Candidato = {
-  id: number;
-  nombre: string | null;
-  avatar: string | null;
-};
-
 type Funcionario = {
   id: number;
   ministerio_id: number;
-  candidato_id: number;
+  nombre: string | null;
+  avatar: string | null;
   cargo: string;
   bio: string | null;
   trayectoria: string | null;
   fecha_inicio: string | null;
   fecha_fin: string | null;
   activo: boolean;
-  candidato: Candidato | null;
 };
 
 type LinkFuncionario = {
@@ -178,14 +172,6 @@ const TIPOS_FUENTE = [
 /* ============================================================
    HELPERS
 ============================================================ */
-
-function normalizarRelacion<T>(value: T | T[] | null | undefined): T | null {
-  if (Array.isArray(value)) {
-    return value[0] ?? null;
-  }
-
-  return value ?? null;
-}
 
 function formatDate(fecha: string | null) {
   if (!fecha) return "Sin fecha";
@@ -370,18 +356,14 @@ function AdminMinisterioDetailContenido() {
       .select(`
         id,
         ministerio_id,
-        candidato_id,
+        nombre,
+        avatar,
         cargo,
         bio,
         trayectoria,
         fecha_inicio,
         fecha_fin,
-        activo,
-        candidato:candidato_id (
-          id,
-          nombre,
-          avatar
-        )
+        activo
       `)
       .eq("ministerio_id", ministerioId)
       .eq("activo", true)
@@ -400,31 +382,26 @@ function AdminMinisterioDetailContenido() {
     let funcionarioNormalizado: Funcionario | null = null;
 
     if (funcionarioData) {
-      const raw = funcionarioData as typeof funcionarioData & {
-        candidato:
-          | Candidato
-          | Candidato[]
-          | null;
-      };
+      const raw = funcionarioData;
 
       funcionarioNormalizado = {
         id: raw.id,
         ministerio_id: raw.ministerio_id,
-        candidato_id: raw.candidato_id,
+        nombre: raw.nombre,
+        avatar: raw.avatar,
         cargo: raw.cargo,
         bio: raw.bio,
         trayectoria: raw.trayectoria,
         fecha_inicio: raw.fecha_inicio,
         fecha_fin: raw.fecha_fin,
         activo: raw.activo,
-        candidato: normalizarRelacion(raw.candidato),
       };
 
       setFuncionario(funcionarioNormalizado);
 
       setFuncionarioForm({
-        nombre: funcionarioNormalizado.candidato?.nombre ?? "",
-        avatar: funcionarioNormalizado.candidato?.avatar ?? "",
+        nombre: funcionarioNormalizado.nombre ?? "",
+        avatar: funcionarioNormalizado.avatar ?? "",
         cargo: funcionarioNormalizado.cargo ?? "",
         bio: funcionarioNormalizado.bio ?? "",
         trayectoria: funcionarioNormalizado.trayectoria ?? "",
@@ -568,47 +545,42 @@ function AdminMinisterioDetailContenido() {
   const saveFuncionario = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!funcionario || savingFuncionario) return;
+    if (!ministerioId || !isAdmin || savingFuncionario) return;
+    if (!funcionarioForm.nombre.trim()) {
+      setStatus({ type: "error", message: "El nombre del funcionario es obligatorio." });
+      return;
+    }
 
     setSavingFuncionario(true);
     setStatus({ type: "idle" });
 
     const supabase = createClient();
 
-    const { error: candidatoError } = await supabase
-      .from("candidatos")
-      .update({
-        nombre: funcionarioForm.nombre.trim(),
-        avatar: funcionarioForm.avatar.trim() || null,
-      })
-      .eq("id", funcionario.candidato_id);
+    const payload = {
+      nombre: funcionarioForm.nombre.trim(),
+      avatar: funcionarioForm.avatar.trim() || null,
+      cargo: funcionarioForm.cargo.trim() || "Ministro/a",
+      bio: funcionarioForm.bio.trim() || null,
+      trayectoria: funcionarioForm.trayectoria.trim() || null,
+      fecha_inicio: funcionarioForm.fecha_inicio || null,
+      fecha_fin: funcionarioForm.fecha_fin || null,
+      updated_at: new Date().toISOString(),
+    };
 
-    if (candidatoError) {
+    const { data: guardado, error: funcionarioError } = funcionario
+      ? await supabase.from("funcionarios_ministerio")
+          .update(payload)
+          .eq("id", funcionario.id)
+          .eq("ministerio_id", ministerioId)
+          .select("id").single()
+      : await supabase.from("funcionarios_ministerio")
+          .insert({ ...payload, ministerio_id: ministerioId, activo: true })
+          .select("id").single();
+
+    if (funcionarioError || !guardado) {
       setStatus({
         type: "error",
-        message: candidatoError.message,
-      });
-
-      setSavingFuncionario(false);
-      return;
-    }
-
-    const { error: funcionarioError } = await supabase
-      .from("funcionarios_ministerio")
-      .update({
-        cargo: funcionarioForm.cargo.trim() || "Ministro/a",
-        bio: funcionarioForm.bio.trim() || null,
-        trayectoria: funcionarioForm.trayectoria.trim() || null,
-        fecha_inicio: funcionarioForm.fecha_inicio || null,
-        fecha_fin: funcionarioForm.fecha_fin || null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", funcionario.id);
-
-    if (funcionarioError) {
-      setStatus({
-        type: "error",
-        message: funcionarioError.message,
+        message: funcionarioError?.message ?? "No se pudo guardar el funcionario.",
       });
 
       setSavingFuncionario(false);
@@ -956,11 +928,11 @@ function AdminMinisterioDetailContenido() {
         <div className="pointer-events-none absolute -bottom-24 left-20 h-56 w-56 rounded-full bg-emerald-100/60 blur-3xl" />
 
         <div className="relative flex flex-col gap-6 md:flex-row md:items-center">
-          {funcionario?.candidato?.avatar ? (
+          {funcionario?.avatar ? (
             <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100">
               <Image
-                src={funcionario.candidato.avatar}
-                alt={funcionario.candidato.nombre ?? "Funcionario"}
+                src={funcionario.avatar}
+                alt={funcionario.nombre ?? "Funcionario"}
                 fill
                 unoptimized
                 className="object-cover"
@@ -982,7 +954,7 @@ function AdminMinisterioDetailContenido() {
             </h1>
 
             <p className="mt-2 text-lg font-medium text-slate-700">
-              {funcionario?.candidato?.nombre ?? "Sin funcionario activo"}
+              {funcionario?.nombre ?? "Sin funcionario activo"}
             </p>
 
             <p className="mt-1 text-sm text-slate-500">
@@ -1098,7 +1070,7 @@ function AdminMinisterioDetailContenido() {
           FUNCIONARIO
       ====================================================== */}
 
-      {funcionario && (
+      {ministerio && (
         <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
           <div className="mb-7 flex items-start gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50">
@@ -1107,7 +1079,7 @@ function AdminMinisterioDetailContenido() {
 
             <div>
               <h2 className="text-xl font-semibold text-slate-950">
-                Perfil del funcionario
+                {funcionario ? "Perfil del funcionario" : "Registrar funcionario"}
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">

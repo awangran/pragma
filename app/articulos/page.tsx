@@ -127,12 +127,12 @@ const DATOS: Record<string, DatoPais> = {
   },
 };
 const INDICE = [
-  { ancla: "#ingresos", etiqueta: "Ingresos", valor: "28,0 %", detalle: "de las personas vivía en pobreza monetaria", icono: Wallet },
-  { ancla: "#trabajo", etiqueta: "Trabajo", valor: "55,3 %", detalle: "de las personas ocupadas se clasificaba como informal", icono: BriefcaseBusiness },
-  { ancla: "#bosques", etiqueta: "Bosques", valor: "119.483 ha", detalle: "de bosque perdidas por deforestación en 2025", icono: Trees },
-  { ancla: "#agua", etiqueta: "Agua", valor: "4,49 M", detalle: "de personas rurales sin cobertura de acueducto", icono: Droplets },
-  { ancla: "#vejez", etiqueta: "Vejez", valor: "1,05 M", detalle: "de mayores elegibles sin Colombia Mayor", icono: HeartHandshake },
-  { ancla: "#conectividad", etiqueta: "Internet", valor: "34,4 %", detalle: "de los hogares no tenía conexión a internet", icono: WifiOff },
+  { ancla: "#ingresos", etiqueta: "Ingresos", icono: Wallet },
+  { ancla: "#trabajo", etiqueta: "Trabajo", icono: BriefcaseBusiness },
+  { ancla: "#bosques", etiqueta: "Bosques", icono: Trees },
+  { ancla: "#agua", etiqueta: "Agua", icono: Droplets },
+  { ancla: "#vejez", etiqueta: "Vejez", icono: HeartHandshake },
+  { ancla: "#conectividad", etiqueta: "Internet", icono: WifiOff },
 ];
 /* =========================================================
    COMPONENTES
@@ -395,13 +395,12 @@ export default async function ArticulosPage() {
           )}
         </section>
         {/* 02 · ÍNDICE DE CIFRAS — con espacio inferior para no pegarse a la franja */}
-         <nav id="cifras" aria-labelledby="cifras-title" className="mx-auto w-full max-w-6xl scroll-mt-24 pb-12 pt-8 md:pb-16">
+        <nav id="cifras" aria-labelledby="cifras-title" className="mx-auto w-full max-w-6xl scroll-mt-24 pb-12 pt-8 md:pb-16">
           <div className="mb-8 max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5574ff]">Colombia en cifras</p>
             <h2 id="cifras-title" className="mt-2 text-2xl font-semibold tracking-tight text-[#111b3f] sm:text-3xl">El país no cabe en un titular.</h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">
-              Las cifras nos ayudan a entender la realidad y a ver lo que a veces pasa desapercibido. Aquí encontrarás datos explicados de forma clara para que puedas sacar tus propias conclusiones.
-            </p>
+                Las cifras hacen visibles realidades que no siempre llegan a los titulares. Aquí encontrarás datos para entender cómo se vive en Colombia, poner en contexto lo que escuchas y formar tu propia opinión.            </p>
           </div>
           <ol className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 lg:grid-cols-6 lg:gap-x-6">
             {INDICE.map((item, index) => {
@@ -424,8 +423,6 @@ export default async function ArticulosPage() {
                       </div>
                     </div>
                     <div className="mx-auto mt-4 max-w-[170px]">
-                      <p className="whitespace-nowrap text-2xl font-semibold tracking-[-0.035em] text-[#111b3f] transition-colors group-hover:text-[#5574ff]">{item.valor}</p>
-                      <p className="mt-1.5 text-xs leading-5 text-slate-600">{item.detalle}</p>
                     </div>
                   </a>
                 </li>

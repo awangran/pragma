@@ -3,8 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "./ui/button";
-import { User, Menu, X, Plus } from "lucide-react";
-import { LogoutButton } from "./logout-button";
+import { User, Menu, X, Plus, Bookmark, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -13,6 +13,38 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+function AccountMenu({ avatarUrl }: { avatarUrl?: string }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  async function logout() {
+    if (busy) return;
+    setBusy(true); setError("");
+    try {
+      const { error: authError } = await createClient().auth.signOut();
+      if (authError) { setError("No pudimos cerrar la sesión."); return; }
+      router.push("/auth/login"); router.refresh();
+    } catch { setError("No pudimos cerrar la sesión."); }
+    finally { setBusy(false); }
+  }
+  return <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <button type="button" aria-label="Abrir menú de cuenta"
+        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#181C32] text-white ring-1 ring-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5574ff]">
+        {avatarUrl ? <Image src={avatarUrl} alt="" width={36} height={36} unoptimized className="h-9 w-9 object-cover" /> : <User aria-hidden className="h-4 w-4" />}
+      </button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-48 rounded-xl border-[#e2e9f8] bg-white p-1.5 text-[#111b3f] shadow-lg">
+      <DropdownMenuItem asChild><Link href="/perfil?seccion=guardados" className="flex items-center gap-2"><Bookmark aria-hidden className="h-4 w-4" />Ver favoritos</Link></DropdownMenuItem>
+      <DropdownMenuItem asChild><Link href="/perfil?seccion=cuenta" className="flex items-center gap-2"><User aria-hidden className="h-4 w-4" />Ver mi perfil</Link></DropdownMenuItem>
+      <DropdownMenuItem disabled={busy} onSelect={(event) => { event.preventDefault(); void logout(); }} className="mt-1 flex items-center gap-2 border-t border-[#e2e9f8] text-rose-700">
+        <LogOut aria-hidden className="h-4 w-4" />{busy ? "Cerrando sesión…" : "Cerrar sesión"}
+      </DropdownMenuItem>
+      {error && <p role="alert" className="px-2 py-2 text-xs text-rose-700">{error}</p>}
+    </DropdownMenuContent>
+  </DropdownMenu>;
+}
 
 export function Navbar({
   user,
@@ -150,29 +182,7 @@ export function Navbar({
               <Link href="/auth/sign-up">Regístrate</Link>
             </Button>
           ) : (
-            <>
-              {user.avatarUrl ? (
-                <Image
-                  src={user.avatarUrl}
-                  alt="Perfil"
-                  width={36}
-                  height={36}
-                  className="h-9 w-9 rounded-full object-cover ring-1 ring-slate-100"
-                />
-              ) : (
-                <div
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#181C32]"
-                  title="Perfil"
-                >
-                  <User
-                    className="h-4 w-4 text-white"
-                    aria-hidden="true"
-                  />
-                </div>
-              )}
-
-              <LogoutButton />
-            </>
+            <AccountMenu avatarUrl={user.avatarUrl} />
           )}
         </div>
 
@@ -180,6 +190,8 @@ export function Navbar({
             MOBILE MENU BUTTON
         ====================================================== */}
 
+        <div className="flex items-center gap-3 md:hidden">
+          {user && <AccountMenu avatarUrl={user.avatarUrl} />}
         <button
           className="rounded-full p-2 transition-colors hover:bg-slate-100 md:hidden"
           onClick={() => setIsOpen((current) => !current)}
@@ -192,6 +204,7 @@ export function Navbar({
             <Menu className="h-5 w-5 text-[#181C32]" />
           )}
         </button>
+        </div>
       </div>
 
       {/* =====================================================
@@ -266,40 +279,7 @@ export function Navbar({
                   </Link>
                 </Button>
               ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 px-4">
-                    {user.avatarUrl ? (
-                      <Image
-                        src={user.avatarUrl}
-                        alt="Perfil"
-                        width={40}
-                        height={40}
-                        className="h-10 w-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#181C32]">
-                        <User
-                          className="h-5 w-5 text-white"
-                          aria-hidden="true"
-                        />
-                      </div>
-                    )}
-
-                    <div>
-                      <p className="text-sm font-medium text-[#181C32]">
-                        Mi perfil
-                      </p>
-
-                      {isAdmin && (
-                        <p className="text-[10px] font-medium text-violet-600">
-                          Administrador
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <LogoutButton />
-                </div>
+                null
               )}
             </div>
           </div>
