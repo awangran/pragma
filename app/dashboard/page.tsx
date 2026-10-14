@@ -302,7 +302,7 @@ export default async function DashboardPage() {
       </p>
 
       <p className="mt-6 max-w-lg border-l-2 border-[#c7b5f5]/70 pl-5 text-sm leading-6 text-white">
-        Pragma Radar te ayuda a explorar esas preguntas con información clara y confiable. Aquí puedes entender qué le corresponde hacer a cada gobernante, comparar propuestas y seguir si cumplen lo que prometieron, para que formes tu propia opinión y participes con más herramientas.</p>
+        Pragma Radar te ayuda a explorar esas preguntas con información clara y confiable. Aquí puedes entender qué le corresponde hacer a cada gobernante, comparar propuestas y seguir si cumplen lo que prometieron</p>
 
       <div className="mt-5 max-w-lg border-t border-[#b9d8ff]/25 pt-3">
         <p className="text-[0.7rem] leading-5 text-white/70">

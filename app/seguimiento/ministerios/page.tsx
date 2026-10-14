@@ -7,11 +7,11 @@ import { Navbar } from "@/components/navbar";
 import Footer from "@/components/footer";
 import MinisteriosDirectorio, { type MinisterioDirectorio } from "./ministerios-directorio";
 
-type Persona = { nombre: string | null; avatar: string | null };
 type Funcionario = {
   id: number;
   cargo: string;
-  candidato: Persona | Persona[] | null;
+  nombre: string | null;
+  avatar: string | null;
 };
 type MinisterioRaw = {
   id: number;
@@ -134,7 +134,7 @@ async function ListadoMinisterios() {
 
   const { data, error } = await supabase
     .from("ministerios")
-    .select("id,nombre,slug,descripcion,funcionarios_ministerio(id,cargo,candidato:candidato_id(nombre,avatar))")
+    .select("id,nombre,slug,descripcion,funcionarios_ministerio(id,cargo,nombre,avatar)")
     .eq("funcionarios_ministerio.activo", true)
     .order("nombre", { ascending: true })
     .order("id", { referencedTable: "funcionarios_ministerio", ascending: false });
@@ -155,11 +155,7 @@ async function ListadoMinisterios() {
 
   const ministerios: MinisterioDirectorio[] = ((data ?? []) as unknown as MinisterioRaw[]).map((m) => {
     const f = m.funcionarios_ministerio?.[0];
-    const persona = f
-      ? Array.isArray(f.candidato)
-        ? f.candidato[0]
-        : f.candidato
-      : null;
+    const persona = f;
 
     return {
       id: m.id,

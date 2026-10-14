@@ -1,3 +1,4 @@
+import { FavoriteButton } from "@/components/favorite-button";
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -212,6 +213,7 @@ export default async function CandidateProfilePage({ params }: CandidateProfileP
                 </div>
                 <div className="mt-6 flex flex-wrap items-center gap-4">
                   <p className="text-xs text-slate-600">{propuestasArray.length} propuestas · {Object.keys(propuestasPorTema).length} temas</p>
+                  <FavoriteButton tipo="candidato" recursoId={candidateId} />
                 </div>
               </div>
             </div>

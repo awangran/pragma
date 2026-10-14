@@ -6,13 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/navbar";
 import Footer from "@/components/footer";
 import { ArrowLeft, Building2, ChevronDown } from "lucide-react";
-type Persona = { id: number; nombre: string | null; avatar: string | null };
-type Funcionario = { id: number; cargo: string; bio: string | null; trayectoria: string | null; fecha_inicio: string | null; fecha_fin: string | null; candidato: Persona | Persona[] | null };
+type Funcionario = { id: number; cargo: string; bio: string | null; trayectoria: string | null; fecha_inicio: string | null; fecha_fin: string | null; nombre: string | null; avatar: string | null };
 type Ministerio = { id: number; nombre: string; slug: string; descripcion: string | null; sitio_web: string | null; logo: string | null };
 type Actividad = { id: number; titulo: string; resumen: string; tipo: string | null; fecha: string | null; url_oficial: string | null; imagen_url: string | null; estado: string | null; fecha_inicio: string | null; fecha_fin: string | null };
 type Fuente = { id: number; titulo: string; url: string; tipo: string | null; fecha_fuente: string | null; proyecto_id?: number; actividad_id?: number };
 type Enlace = { id: number; titulo: string; url: string; tipo: string | null };
-function personaDe(f: Funcionario) { return Array.isArray(f.candidato) ? f.candidato[0] ?? null : f.candidato; }
+function personaDe(f: Funcionario) { return f; }
 function urlSegura(valor?: string | null) { if (!valor) return null; try { const u = new URL(valor); return ["http:", "https:"].includes(u.protocol) ? u.href : null; } catch { return null; } }
 function fotoSegura(valor?: string | null) { return valor?.startsWith("/") && !valor.startsWith("//") ? valor : urlSegura(valor); }
 function fecha(valor?: string | null) { if (!valor) return null; const d = new Date(`${valor.slice(0,10)}T12:00:00Z`); return Number.isNaN(d.getTime()) ? null : new Intl.DateTimeFormat("es-CO", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(d); }
@@ -24,7 +23,7 @@ function fotoTema(nombre: string) {
 async function NavbarConUsuario() { const supabase = await createClient(); const { data } = await supabase.auth.getUser(); return <Navbar user={data.user ? { avatarUrl: data.user.user_metadata?.avatar_url ?? null } : null} />; }
 function Cargando() { return <div role="status" className="mx-auto w-full max-w-6xl px-6 py-10"><p className="text-sm text-[#7863bd]">Cargando información institucional…</p><div aria-hidden="true" className="mt-6 h-56 rounded-[28px] bg-[#edf2ff] motion-safe:animate-pulse" /></div>; }
 function Marco({ children }: { children: React.ReactNode }) { return <div className="min-h-screen bg-white text-[#111b3f]"><div className="px-4 sm:px-6 lg:px-8"><Suspense fallback={<Navbar user={null} />}><NavbarConUsuario /></Suspense></div>{children}<footer><Suspense fallback={<div className="p-6 text-xs text-slate-500">Cargando pie de página…</div>}><Footer /></Suspense></footer></div>; }
-const CAMPOS_FUNCIONARIO = "id, cargo, bio, trayectoria, fecha_inicio, fecha_fin, candidato:candidato_id(id,nombre,avatar)";
+const CAMPOS_FUNCIONARIO = "id, cargo, bio, trayectoria, fecha_inicio, fecha_fin, nombre, avatar";
 function EnlaceExterno({url,children}:{url:string|null|undefined;children:React.ReactNode}) { const segura=urlSegura(url); return segura ? <a href={segura} target="_blank" rel="noopener noreferrer" className="inline-flex max-w-full items-center gap-2 break-words text-xs font-semibold text-[#5574ff] underline decoration-[#5574ff]/40 underline-offset-4 hover:decoration-[#5574ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5574ff]">{children}<span className="sr-only">Abre en una pestaña nueva</span></a> : null; }
 function claveFuente(valor: string) {
   const u = new URL(valor);

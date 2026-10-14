@@ -191,7 +191,7 @@ export default async function CandidatesPage() {
               <p className="mt-3 text-sm leading-7 text-slate-600">
                 En las elecciones territoriales elegimos alcaldes, gobernadores, concejales, diputados de las asambleas departamentales y ediles de las juntas administradoras locales.
               </p>
-              <a href="https://www.registraduria.gov.co/-Historico-de-resultados-electorales-.html" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-xs text-[#5574ff] underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5574ff]">Sobre las elecciones territoriales · Registraduría<span className="sr-only"> (abre en una pestaña nueva)</span></a>
+              <a href="https://www.registraduria.gov.co/-Historico-de-resultados-electorales-.html" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-xs text-[#5574ff] underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5574ff]">Registraduría<span className="sr-only"> (abre en una pestaña nueva)</span></a>
             </div>
             {locales.length === 0 && (
               <div className="border-l-2 border-[#b5a0e3] pl-5">

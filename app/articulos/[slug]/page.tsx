@@ -1,3 +1,4 @@
+import { FavoriteButton } from "@/components/favorite-button";
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -147,7 +148,10 @@ async function ContenidoArticulo({ params }: ArticlePageProps) {
             <Link href="/articulos" className={`inline-flex items-center gap-2 text-xs font-medium text-[#5574ff] ${foco}`}>
               <ArrowLeft aria-hidden="true" className="h-4 w-4" />Todas las lecturas
             </Link>
+            <div className="flex flex-wrap items-center justify-end gap-4">
+              <FavoriteButton tipo="articulo" recursoId={article.id} />
             {isAdmin && <Link href={`/admin/edit-articulo/${articleId}`} className={`inline-flex items-center gap-2 border-b border-[#a5b8ff] pb-1 text-xs text-[#7863bd] ${foco}`}><Pencil aria-hidden="true" className="h-3.5 w-3.5" />Editar</Link>}
+            </div>
           </nav>
 
           <header className="relative isolate overflow-hidden bg-[#111b3f] text-white">

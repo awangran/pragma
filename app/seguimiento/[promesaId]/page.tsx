@@ -1,3 +1,4 @@
+import OpinionPromesaSection from "@/components/opinion-promesa-section";
 import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -379,6 +380,7 @@ async function SeguimientoDetalleContenido({
         <nav aria-label="Secciones del compromiso" className="mx-auto flex w-full max-w-6xl flex-wrap gap-x-7 gap-y-3 px-6 pt-6 text-xs font-medium text-[#243d9b]">
           <a href="#propuesta" className="border-b border-[#a5b8ff] pb-1">La propuesta</a>
           <a href="#estado-actual" className="border-b border-[#a5b8ff] pb-1">Estado actual</a>
+          <a href="#opinion-ciudadana" className="border-b border-[#a5b8ff] pb-1">Opinión ciudadana</a>
         </nav>
 
         {/* 2 · LO PROMETIDO */}
@@ -447,6 +449,9 @@ async function SeguimientoDetalleContenido({
               El avance pertenece a la última actualización. No se calcula automáticamente a partir de las fuentes o los registros.
             </p>
           )}
+          <Suspense fallback={<p role="status" className="mt-7 border-t border-[#dfe7f8] pt-5 text-xs text-slate-500">Cargando opinión ciudadana…</p>}>
+            <OpinionPromesaSection propuestaId={propuestaId} />
+          </Suspense>
           </div>
         </section>
 

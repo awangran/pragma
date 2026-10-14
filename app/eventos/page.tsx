@@ -1,3 +1,4 @@
+import { FavoriteButton } from "@/components/favorite-button";
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -164,6 +165,7 @@ export default async function EventosPage() {
                 >
                   {destacado.titulo}
                 </h2>
+                <div className="mt-3"><FavoriteButton tipo="evento" recursoId={destacado.id} /></div>
 
                 <div className="mt-5 space-y-3 border-t border-[#ded5ef] pt-4 text-xs leading-6 text-slate-600">
                   <p className="flex items-start gap-3">

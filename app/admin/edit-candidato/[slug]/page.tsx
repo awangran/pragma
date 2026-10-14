@@ -24,7 +24,7 @@ type Tema = {
 };
 
 type PropuestaState = {
-	id?: string;
+	id?: string | number;
 	tema_id: string;
 	titulo: string;
 	que_pasa: string;
@@ -33,7 +33,7 @@ type PropuestaState = {
 };
 
 type ExperienciaState = {
-	id?: string;
+	id?: string | number;
 	historial: string;
 };
 
@@ -58,7 +58,12 @@ export default function AdminEditPage() {
 	const [temas, setTemas] = useState<Tema[]>([]);
 	const [propuestas, setPropuestas] = useState<PropuestaState[]>([]);
 	const [experiencias, setExperiencias] = useState<ExperienciaState[]>([]);
+	const [trayectoria, setTrayectoria] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const savingRef = useRef(false);
+	const [savingSection, setSavingSection] = useState<string | null>(null);
+	const [sectionMessages, setSectionMessages] = useState<Record<string, { type: "success" | "error"; message: string }>>({});
+	const [experienceReady, setExperienceReady] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 	const [isCheckingRole, setIsCheckingRole] = useState(true);
 	const [isLoading, setIsLoading] = useState(true);
@@ -152,12 +157,15 @@ export default function AdminEditPage() {
 			const { data: experienciasData, error: experienciasError } = await supabase
 				.from("experiencia")
 				.select()
-				.eq("candidato_id", candidateId);
+				.eq("candidato_id", candidateId).order("id", { ascending: true });
 
 			if (!experienciasError && experienciasData) {
+				setExperienceReady(true);
 				setExperiencias(experienciasData as ExperienciaState[]);
+				setTrayectoria((experienciasData as ExperienciaState[]).map(exp => exp.historial).join("\n"));
 			}
 
+			if (propuestasError || experienciasError) setStatus({ type: "error", message: propuestasError?.message ?? experienciasError?.message ?? "Error de carga" });
 			// Fetch temas
 			const { data: temasData, error: temasError } = await supabase
 				.from("tema")
@@ -183,201 +191,91 @@ export default function AdminEditPage() {
 		setForm((prev) => ({ ...prev, [name]: value }));
 	};
 
-	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		if (isSubmitting || isUploading) return;
+	const saveSection = async (key: string, action: () => Promise<void>) => {
+        if (savingRef.current || isUploading || !isAdmin) return;
+        savingRef.current = true;
+        setIsSubmitting(true);
+        setSavingSection(key);
+        setSectionMessages(prev => { const next = { ...prev }; delete next[key]; return next; });
+        try {
+            await action();
+            setSectionMessages(prev => ({ ...prev, [key]: { type: "success", message: "Cambios guardados." } }));
+        } catch (error) {
+            setSectionMessages(prev => ({ ...prev, [key]: { type: "error", message: error instanceof Error ? error.message : "No se pudo guardar." } }));
+        } finally {
+            savingRef.current = false;
+            setIsSubmitting(false);
+            setSavingSection(null);
+        }
+    };
 
-		let avatarUrl = form.avatar.trim();
-		if (!avatarUrl) {
-			const file = avatarInputRef.current?.files?.[0] ?? null;
-			if (!file && !form.avatar) {
-				setStatus({
-					type: "error",
-					message: "Debes seleccionar una foto válida.",
-				});
-				return;
-			}
+    const saveBasic = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        await saveSection("basic", async () => {
+            if (["minister", "ministro", "ministra"].includes(form.tipo.trim().toLowerCase())) throw new Error("Registra y edita ministros desde Administración → Ministerios.");
+            if (!form.nombre.trim() || !form.cargo.trim() || !form.partido.trim() || !form.ubicacion || !form.tipo.trim()) throw new Error("Completa los datos básicos obligatorios.");
+            if (!form.avatar.trim()) throw new Error("Selecciona una foto o escribe su URL.");
+            const payload = { nombre: form.nombre.trim(), cargo: form.cargo.trim(), partido: form.partido.trim(), ubicacion: form.ubicacion.trim(), links: form.links.trim(), tipo: form.tipo.trim(), avatar: form.avatar.trim() };
+            const supabase = createClient();
+            const { data, error } = await supabase.from("candidatos").update(payload).eq("id", candidateId).select("id").single();
+            if (error || !data) throw new Error(error?.message ?? "No se pudo guardar el candidato.");
+        });
+    };
 
-			if (file) {
-				const publicUrl = await uploadAvatarFile(file);
-				if (!publicUrl) {
-					return;
-				}
-				avatarUrl = publicUrl;
-			}
-		}
+    const saveProfile = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        await saveSection("profile", async () => {
+            if (!candidateId || !experienceReady) throw new Error("Primero crea el candidato y espera a que cargue su experiencia.");
+            const supabase = createClient();
+            const { error: bioError } = await supabase.from("candidatos").update({ descripcion: form.descripcion.trim() }).eq("id", candidateId);
+            if (bioError) throw new Error(bioError.message);
+            const lines = trayectoria.split("\n").map(line => line.replace(/^\s*[-•]\s*/, "").trim()).filter(Boolean);
+            // Track each successful insert immediately so a retry cannot duplicate it.
+            const working = [...experiencias];
+            for (let index = 0; index < lines.length; index++) {
+                const existing = working[index];
+                if (existing?.id != null) {
+                    const { error } = await supabase.from("experiencia").update({ historial: lines[index] }).eq("id", existing.id).eq("candidato_id", candidateId);
+                    if (error) throw new Error("La biografía se guardó; no se pudo completar la experiencia: " + error.message);
+                    working[index] = { ...existing, historial: lines[index] };
+                } else {
+                    const { data, error } = await supabase.from("experiencia").insert({ candidato_id: candidateId, historial: lines[index] }).select("id,historial").single();
+                    if (error || !data) throw new Error("La biografía se guardó; no se pudo completar la experiencia: " + (error?.message ?? "Sin respuesta"));
+                    working[index] = data as ExperienciaState;
+                }
+                setExperiencias([...working]);
+            }
+            const removed = working.slice(lines.length).flatMap(item => item.id == null ? [] : [item.id]);
+            if (removed.length) {
+                const { error } = await supabase.from("experiencia").delete().eq("candidato_id", candidateId).in("id", removed);
+                if (error) throw new Error("La biografía se guardó; no se pudieron quitar experiencias: " + error.message);
+            }
+            setExperiencias(working.slice(0, lines.length));
+        });
+    };
 
-		setIsSubmitting(true);
-		setStatus({ type: "idle" });
+    const saveProposal = async (index: number, event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        await saveSection(`proposal-${index}`, async () => {
+            if (!candidateId) throw new Error("Primero crea el candidato.");
+            const item = propuestas[index];
+            const payload = { tema_id: String(item.tema_id).trim(), titulo: item.titulo.trim(), que_pasa: item.que_pasa.trim(), que_propone: item.que_propone.trim(), que_cambia: item.que_cambia.trim() };
+            if (Object.values(payload).some(value => !value)) throw new Error("Completa los cinco campos de esta propuesta.");
+            const supabase = createClient();
+            if (item.id != null) {
+                const { error } = await supabase.from("propuestas").update(payload).eq("id", item.id).eq("candidato_id", candidateId);
+                if (error) throw new Error(error.message);
+            } else {
+                const { data, error } = await supabase.from("propuestas").insert({ ...payload, candidato_id: candidateId }).select("id").single();
+                if (error || !data) throw new Error(error?.message ?? "No se pudo crear la propuesta.");
+                setPropuestas(prev => prev.map((proposal, position) => position === index ? { ...proposal, id: data.id } : proposal));
+            }
+        });
+    };
 
-		const supabase = createClient();
-
-		// Update candidate
-		const { error: updateError } = await supabase
-			.from("candidatos")
-			.update({
-				nombre: form.nombre.trim(),
-				cargo: form.cargo.trim(),
-				partido: form.partido.trim(),
-				ubicacion: form.ubicacion.trim(),
-				descripcion: form.descripcion.trim(),
-				links: form.links.trim(),
-				tipo: form.tipo.trim(),
-				avatar: avatarUrl,
-			})
-			.eq("id", candidateId);
-
-		if (updateError) {
-			setStatus({
-				type: "error",
-				message: updateError.message,
-			});
-			setIsSubmitting(false);
-			return;
-		}
-
-		// Handle experiencias updates and inserts
-		const experienciasLimpias = experiencias
-			.map((exp) => ({ ...exp, historial: exp.historial.trim() }))
-			.filter((exp) => exp.historial);
-
-		const newExperiencias = experienciasLimpias.filter((e) => !e.id);
-		const existingExperiencias = experienciasLimpias.filter((e) => e.id);
-
-		if (newExperiencias.length > 0) {
-			const { error: insertExpError } = await supabase
-				.from("experiencia")
-				.insert(
-					newExperiencias.map((exp) => ({
-						historial: exp.historial,
-						candidato_id: candidateId,
-					})),
-				);
-
-			if (insertExpError) {
-				setStatus({ type: "error", message: insertExpError.message });
-				setIsSubmitting(false);
-				return;
-			}
-		}
-
-		for (const exp of existingExperiencias) {
-			const { error: updateExpError } = await supabase
-				.from("experiencia")
-				.update({ historial: exp.historial })
-				.eq("id", exp.id);
-
-			if (updateExpError) {
-				setStatus({ type: "error", message: updateExpError.message });
-				setIsSubmitting(false);
-				return;
-			}
-		}
-
-		// Handle propuestas updates and inserts
-		const propuestasLimpias = propuestas
-			.map((propuesta) => ({
-				...propuesta,
-				tema_id: String(propuesta.tema_id).trim(),
-				titulo: propuesta.titulo.trim(),
-				que_pasa: propuesta.que_pasa.trim(),
-				que_propone: propuesta.que_propone.trim(),
-				que_cambia: propuesta.que_cambia.trim(),
-			}))
-			.filter(
-				(item) =>
-					item.tema_id &&
-					item.titulo &&
-					item.que_pasa &&
-					item.que_propone &&
-					item.que_cambia,
-			);
-
-		if (propuestasLimpias.length > 0) {
-			// Separate new and existing propuestas
-			const newPropuestas = propuestasLimpias.filter((p) => !p.id);
-			const existingPropuestas = propuestasLimpias.filter((p) => p.id);
-
-			// Insert new propuestas
-			if (newPropuestas.length > 0) {
-				const { error: insertError } = await supabase
-					.from("propuestas")
-					.insert(
-						newPropuestas.map((propuesta) => ({
-							candidato_id: candidateId,
-							tema_id: propuesta.tema_id,
-							titulo: propuesta.titulo,
-							que_pasa: propuesta.que_pasa,
-							que_propone: propuesta.que_propone,
-							que_cambia: propuesta.que_cambia,
-						})),
-					);
-
-				if (insertError) {
-					setStatus({
-						type: "error",
-						message: insertError.message,
-					});
-					setIsSubmitting(false);
-					return;
-				}
-			}
-
-			// Update existing propuestas
-			for (const propuesta of existingPropuestas) {
-				const { error: updatePropError } = await supabase
-					.from("propuestas")
-					.update({
-						tema_id: propuesta.tema_id,
-						titulo: propuesta.titulo,
-						que_pasa: propuesta.que_pasa,
-						que_propone: propuesta.que_propone,
-						que_cambia: propuesta.que_cambia,
-					})
-					.eq("id", propuesta.id);
-
-				if (updatePropError) {
-					setStatus({
-						type: "error",
-						message: updatePropError.message,
-					});
-					setIsSubmitting(false);
-					return;
-				}
-			}
-		}
-
-		setStatus({ type: "success", message: "Candidato actualizado." });
-		setIsSubmitting(false);
-		setTimeout(() => router.push(`/candidatos/${candidateId}`), 1500);
-	};
-
-	const handleExperienciaChange = (index: number, value: string) => {
-		setExperiencias((prev) =>
-			prev.map((item, i) => (i === index ? { ...item, historial: value } : item)),
-		);
-	};
-
-	const handleAddExperiencia = () => {
-		setExperiencias((prev) => [...prev, { historial: "" }]);
-	};
-
-	const handleRemoveExperiencia = async (index: number) => {
-		const exp = experiencias[index];
-		if (exp.id) {
-			const supabase = createClient();
-			const { error } = await supabase
-				.from("experiencia")
-				.delete()
-				.eq("id", exp.id);
-
-			if (error) {
-				setStatus({ type: "error", message: "No se pudo eliminar la experiencia." });
-				return;
-			}
-		}
-		setExperiencias((prev) => prev.filter((_, i) => i !== index));
-	};
+    const sectionFeedback = (key: string) => sectionMessages[key] ? (
+        <p role="status" className={sectionMessages[key].type === "error" ? "text-sm text-red-600" : "text-sm text-emerald-600"}>{sectionMessages[key].message}</p>
+    ) : null;
 
 	const handlePropuestaChange = (
 		index: number,
@@ -392,6 +290,7 @@ export default function AdminEditPage() {
 	};
 
 	const handleAddPropuesta = () => {
+        setSectionMessages({});
 		setPropuestas((prev) => [
 			...prev,
 			{
@@ -404,30 +303,18 @@ export default function AdminEditPage() {
 		]);
 	};
 
-	const handleRemovePropuesta = async (index: number) => {
-		const propuestaToRemove = propuestas[index];
-
-		// If it's an existing propuesta with an ID, delete from DB
-		if (propuestaToRemove.id) {
-			const supabase = createClient();
-			const { error } = await supabase
-				.from("propuestas")
-				.delete()
-				.eq("id", propuestaToRemove.id);
-
-			if (error) {
-				setStatus({
-					type: "error",
-					message: "No se pudo eliminar la propuesta.",
-				});
-				return;
-			}
-		}
-
-		setPropuestas((prev) =>
-			prev.filter((_, itemIndex) => itemIndex !== index),
-		);
-	};
+    const handleRemovePropuesta = async (index: number) => {
+        if (propuestas[index].id != null && !window.confirm("¿Eliminar esta propuesta? Esta acción también la elimina de la base de datos.")) return;
+        await saveSection(`delete-${index}`, async () => {
+            const item = propuestas[index];
+            if (item.id != null) {
+                const { error } = await createClient().from("propuestas").delete().eq("id", item.id).eq("candidato_id", candidateId);
+                if (error) throw new Error(error.message);
+            }
+            setPropuestas(prev => prev.filter((_, position) => position !== index));
+            setSectionMessages({});
+        });
+    };
 
 	const handleAvatarUpload = async (
 		event: ChangeEvent<HTMLInputElement>,
@@ -534,13 +421,14 @@ export default function AdminEditPage() {
 			<header className="mb-10 space-y-3">
 				<h1 className="text-4xl font-bold text-foreground">Editar candidato</h1>
 				<p className="text-base text-muted-foreground max-w-2xl">
-					Actualiza la información del candidato. Todos los campos marcados son obligatorios.
+					Guarda cada sección por separado. Puedes continuar editando aquí después de guardar.
 				</p>
 			</header>
 
-                <form className="space-y-10" onSubmit={handleSubmit}>
+                <div className="space-y-8">
+                    <form onSubmit={saveBasic} className="rounded-2xl border border-slate-200 bg-white p-6 space-y-5"><fieldset disabled={isSubmitting || isUploading} className="space-y-5">
                     {/* Candidate Information Section */}
-                    <section className="space-y-5">
+                    <section className="rounded-2xl border border-slate-200 bg-white p-6 space-y-5">
                         <div>
                             <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
                                 <span className="w-1 h-6 bg-primary rounded"></span>
@@ -626,19 +514,6 @@ export default function AdminEditPage() {
                             </div>
 
                             <div className="space-y-2 md:col-span-2">
-                                <Label htmlFor="descripcion" className="font-semibold">Descripción Detallada *</Label>
-                                <textarea
-                                    id="descripcion"
-                                    name="descripcion"
-                                    value={form.descripcion}
-                                    onChange={handleChange}
-                                    placeholder="Información sobre el candidato, su trayectoria, propuestas principales, logros relevantes..."
-                                    className="min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                    required
-                                />
-                            </div>
-
-                            <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="links" className="font-semibold">Enlaces / Redes Sociales *</Label>
                                 <Input
                                     id="links"
@@ -664,6 +539,8 @@ export default function AdminEditPage() {
 
                             {/* Avatar Section */}
                             <div className="space-y-3 md:col-span-2 rounded-lg border border-dashed border-primary/20 bg-primary/5 p-4">
+                                <Label htmlFor="avatar-url">URL de la foto</Label>
+                                <Input id="avatar-url" name="avatar" type="url" value={form.avatar} onChange={handleChange} placeholder="https://..." />
                                 <Label htmlFor="avatar" className="font-semibold text-base">Foto del Candidato</Label>
                                 <p className="text-xs text-muted-foreground">Máximo 5MB. Formatos: JPG, PNG, WEBP</p>
                                 <Input
@@ -673,7 +550,7 @@ export default function AdminEditPage() {
                                     accept="image/*"
                                     onChange={handleAvatarUpload}
                                     ref={avatarInputRef}
-                                    disabled={isUploading}
+                                    disabled={isUploading || isSubmitting}
                                     className="cursor-pointer"
                                 />
                                 {form.avatar && (
@@ -683,65 +560,41 @@ export default function AdminEditPage() {
                         </div>
                     </section>
 
-                    {/* Experiencias Section */}
-                    <section className="space-y-5">
-                        <div>
-                            <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                                <span className="w-1 h-6 bg-primary rounded"></span>
-                                Experiencias Previas
-                            </h2>
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <Label className="text-base font-semibold">Historial de experiencia</Label>
-                                    <p className="text-sm text-muted-foreground">Agregue experiencia laboral o cargos anteriores</p>
-                                </div>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleAddExperiencia}
-                                    className="gap-1"
-                                >
-                                    + Agregar
-                                </Button>
+<Button type="submit" disabled={isSubmitting || isUploading}>{savingSection === "basic" ? "Guardando…" : candidateId ? "Guardar datos y enlaces" : "Crear candidato"}</Button>
+{sectionFeedback("basic")}
+</fieldset></form>
+<form onSubmit={saveProfile} className="rounded-2xl border border-slate-200 bg-white p-6 space-y-5">
+<fieldset disabled={!candidateId || isSubmitting || isUploading || !experienceReady} className="space-y-5">
+<h2 className="text-xl font-semibold">Biografía y experiencia</h2>
+                            <div className="space-y-2 md:col-span-2">
+                                <Label htmlFor="descripcion" className="font-semibold">Biografía</Label>
+                                <textarea
+                                    id="descripcion"
+                                    name="descripcion"
+                                    value={form.descripcion}
+                                    onChange={handleChange}
+                                    placeholder="Información sobre el candidato, su trayectoria, propuestas principales, logros relevantes..."
+                                    className="min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                />
                             </div>
 
-                            <div className="space-y-3">
-                                {experiencias.map((exp, index) => (
-                                    <div key={`experiencia-${index}`} className="rounded-lg border border-input bg-card p-4 space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label htmlFor={`experiencia-${index}`} className="font-medium">
-                                                Experiencia {index + 1}
-                                            </Label>
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handleRemoveExperiencia(index)}
-                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                            >
-                                                ✕ Eliminar
-                                            </Button>
-                                        </div>
-                                        <textarea
-                                            id={`experiencia-${index}`}
-                                            value={exp.historial}
-                                            onChange={(e) => handleExperienciaChange(index, e.target.value)}
-                                            placeholder="Describe la experiencia, logros, responsabilidades..."
-                                            className="min-h-[90px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                        />
-                                    </div>
-                                ))}
-                                {experiencias.length === 0 && (
-                                    <p className="text-sm text-muted-foreground">No hay experiencias registradas.</p>
-                                )}
-                            </div>
-                        </div>
-                    </section>
-
+<section className="space-y-3">
+  <Label htmlFor="trayectoria" className="text-base font-semibold">Trayectoria</Label>
+  <p id="trayectoria-ayuda" className="text-sm text-muted-foreground">Escribe una experiencia por línea. Incluye los años, el cargo y la institución.</p>
+  <textarea
+    id="trayectoria"
+    value={trayectoria}
+    onChange={(event) => setTrayectoria(event.target.value)}
+    rows={8}
+    aria-describedby="trayectoria-ayuda"
+    placeholder={"- 2020–2022: Asesora en una entidad pública.\n- 2022–2025: Directora de un programa regional."}
+    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none transition focus:border-slate-400"  />
+</section>
+<Button type="submit">{savingSection === "profile" ? "Guardando…" : "Guardar biografía y experiencia"}</Button>
+{sectionFeedback("profile")}
+</fieldset></form>
                     {/* Propuestas Section */}
-                    <section className="space-y-5">
+                    <section className="rounded-2xl border border-slate-200 bg-white p-6 space-y-5">
                         <div>
                             <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
                                 <span className="w-1 h-6 bg-primary rounded"></span>
@@ -758,6 +611,7 @@ export default function AdminEditPage() {
                                     type="button"
                                     variant="outline"
                                     onClick={handleAddPropuesta}
+                                    disabled={!candidateId || isSubmitting || isUploading}
                                     className="gap-1"
                                 >
                                     + Agregar
@@ -767,7 +621,7 @@ export default function AdminEditPage() {
                             <div className="space-y-4">
                                 {propuestas.map((propuesta, index) => (
                                     <details
-                                        key={`propuesta-${index}`}
+                                        key={propuesta.id != null ? `saved-${propuesta.id}` : `new-${index}`}
                                         className="rounded-lg border border-input bg-card p-4"
                                         open={index === 0}
                                     >
@@ -780,7 +634,7 @@ export default function AdminEditPage() {
                                             </div>
                                         </summary>
 
-                                        <div className="mt-4 space-y-3">
+                                        <form onSubmit={(event) => void saveProposal(index, event)} className="mt-4 space-y-3"><fieldset disabled={!candidateId || isSubmitting || isUploading} className="space-y-3">
                                             <div className="flex items-center justify-between">
                                                 <p className="text-sm text-muted-foreground">Detalles de la propuesta</p>
                                                 {propuestas.length > 0 && (
@@ -807,7 +661,7 @@ export default function AdminEditPage() {
                                                         handlePropuestaChange(index, "tema_id", e.target.value)
                                                     }
                                                     className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                                                    required={index === 0}
+                                                    required
                                                 >
                                                     <option value="">Selecciona un tema</option>
                                                     {temas.map((tema) => (
@@ -829,7 +683,7 @@ export default function AdminEditPage() {
                                                         handlePropuestaChange(index, "titulo", e.target.value)
                                                     }
                                                     placeholder="Título breve de la propuesta"
-                                                    required={index === 0}
+                                                    required
                                                 />
                                             </div>
 
@@ -845,7 +699,7 @@ export default function AdminEditPage() {
                                                     }
                                                     placeholder="Describe el problema o situación actual..."
                                                     className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                                    required={index === 0}
+                                                    required
                                                 />
                                             </div>
 
@@ -861,7 +715,7 @@ export default function AdminEditPage() {
                                                     }
                                                     placeholder="Detalla tu propuesta o solución..."
                                                     className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                                    required={index === 0}
+                                                    required
                                                 />
                                             </div>
 
@@ -877,10 +731,13 @@ export default function AdminEditPage() {
                                                     }
                                                     placeholder="Describe el resultado o cambio esperado..."
                                                     className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                                    required={index === 0}
+                                                    required
                                                 />
                                             </div>
-                                        </div>
+                                        <Button type="submit">{savingSection === `proposal-${index}` ? "Guardando…" : propuesta.id != null ? "Guardar propuesta" : "Agregar propuesta"}</Button>
+                                        {sectionFeedback(`proposal-${index}`)}
+                                        {sectionFeedback(`delete-${index}`)}
+                                        </fieldset></form>
                                     </details>
                                 ))}
                             </div>
@@ -894,19 +751,8 @@ export default function AdminEditPage() {
                         <p className="text-sm text-emerald-600">{status.message}</p>
                     )}
 
-                    <div className="flex gap-3">
-                        <Button type="submit" disabled={isSubmitting || isUploading}>
-                            {isSubmitting ? "Guardando..." : "Guardar cambios"}
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => router.push(`/candidatos/${candidateId}`)}
-                        >
-                            Cancelar
-                        </Button>
-                    </div>
-                </form>
+                    {candidateId ? <Button type="button" variant="outline" onClick={() => router.push(`/candidatos/${candidateId}`)}>Ver perfil público</Button> : <p className="text-sm text-slate-500">Crea el candidato con sus datos básicos para habilitar biografía, experiencia y propuestas.</p>}
+                </div>
             </main>
 	);
 }
